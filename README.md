@@ -1,154 +1,157 @@
-# GarageBand Pad — micro:bit V2 用 Bluetooth MIDI パッド
+# GarageBand Pad — Bluetooth MIDI pad controller for micro:bit V2
 
-micro:bit **V2** のボタンを押すと、Bluetooth Low Energy (BLE) MIDI で **iPad の GarageBand** が鳴る MakeCode 拡張機能です。
-Bluetooth で送るのは「この音を鳴らせ／止めろ」という MIDI メッセージだけで、音そのものは iPad 側で作られます。USB ケーブルもオーディオケーブルも要りません。
+**English** | [日本語](README.ja.md)
+
+Hold the buttons on a **micro:bit V2** and **GarageBand on an iPad** plays — over Bluetooth Low Energy (BLE) MIDI.
+Only MIDI messages ("start this note / stop it") travel over Bluetooth; the sound itself is generated on the iPad.
+No USB cable, no audio cable.
 
 ```
 micro:bit V2 ──(BLE MIDI: note on / note off / pitch bend)──> iPad ──> GarageBand
 ```
 
-## できること
+## What it does
 
-| 機能 | 内容 |
+| Feature | Description |
 | --- | --- |
-| 4 パッド | A / B / A+B / ロゴ（タッチ）を押している間だけ音が鳴る（押す＝note on、離す＝note off） |
-| コードパッド | 1 つのパッドにメジャー / マイナー / 7th / sus4 / パワー / オクターブ を割り当て |
-| オクターブシフト | 割り当てた音をまとめて ±オクターブ移動（曲中で切り替えられる） |
-| 傾きでピッチベンド | 本体を左右に傾けるとピッチが上下（±2 半音） |
-| 傾きでモジュレーション | 傾きでビブラート（CC1） |
-| 接続表示 | iPad がつながると LED にチェック、切れるとバツを表示 |
-| ユーティリティ | サステイン、全音停止、音量、ベロシティ |
+| 4 pads | A / B / A+B / logo (touch). Sounds while held: press = note on, release = note off |
+| Chord pads | Assign major / minor / 7th / sus4 / power / octave to a single pad |
+| Octave shift | Move every assigned note by whole octaves, switchable while you play |
+| Tilt pitch bend | Tilt the board left/right to bend the pitch (±2 semitones) |
+| Tilt modulation | Tilt to add vibrato (CC1) |
+| Connection display | Check mark on the LED when the iPad connects, cross when it drops |
+| Utilities | Sustain, all notes off, channel volume, pad velocity |
 
-## 動作環境
+## Requirements
 
-- **micro:bit V2 必須**（ロゴタッチと V2 用 BLE スタックを使うため）
-- Microsoft MakeCode for micro:bit（makecode.microbit.org）
-- iPad / iPhone の GarageBand（Bluetooth MIDI デバイスに対応したバージョン）
+- **micro:bit V2 required** (uses logo touch and the V2 BLE stack)
+- Microsoft MakeCode for micro:bit (makecode.microbit.org)
+- GarageBand on iPad / iPhone (a version that supports Bluetooth MIDI devices)
 
-## インストール手順
+## Installation
 
-### 1. 拡張機能をインポートする
+### 1. Import the extension
 
-1. [makecode.microbit.org](https://makecode.microbit.org) を開き、新しいプロジェクトを作る
-2. **ボードが micro:bit V2 になっているか確認**（画面下のツールバー、または「プロジェクトの設定」）
-   - V1 のままだと拡張機能がエラー 929 で弾かれます
-3. 歯車アイコン（設定）→「拡張機能」→ **拡張機能をインポート** を開く
-4. 次の URL を貼り付けて確定する
+1. Open [makecode.microbit.org](https://makecode.microbit.org) and create a new project
+2. **Make sure the board is set to micro:bit V2** (bottom toolbar, or Project Settings)
+   - On V1 the extension is rejected with error 929
+3. Gear icon (Settings) → Extensions → **Import Extension**
+4. Paste this URL and confirm:
 
    ```
-   https://github.com/<あなたのアカウント>/pxt-microbit-garageband-pad
+   https://github.com/hinyhiny/pxt-microbit-garageband-pad
    ```
 
-5. ブロック一覧に **GarageBand Pad** カテゴリが出れば成功
+5. The **GarageBand Pad** category appears in the block list — done
 
-### 2. Bluetooth を「ペアリング不要」にする（**必須**）
+### 2. Set Bluetooth to "No Pairing Required" (**mandatory**)
 
-歯車（設定）→「プロジェクトの設定」→ **Bluetooth** を **「ペアリング不要: Bluetooth で誰でも接続できる」** にする。
+Gear icon (Settings) → **Project Settings** → **Bluetooth** → **"No Pairing Required: anyone can connect over Bluetooth"**.
 
-**この設定は .hex に焼き込まれます。設定を変えただけでは何も変わりません。設定後に必ず「ダウンロード」して .hex を書き込み直してください。**
+**This setting is compiled into the .hex. Changing the setting alone does nothing — after changing it you must click Download and re-flash the board.**
 
-#### なぜ必須なのか
+#### Why it is mandatory
 
-MakeCode の既定値は **「JustWorks pairing」** です。この状態では BLE MIDI の文字特性（characteristic）に「**読み取りに認証が必要**」というフラグが付きます。これは `bluetooth-midi` のネイティブ実装が次のように書いているためです。
+MakeCode's default is **"JustWorks pairing"**. In that mode the BLE MIDI characteristic gets a flag meaning **"reading requires authentication"**, because the native implementation in `bluetooth-midi` says:
 
 ```cpp
 uint16_t props = microbit_propREAD | microbit_propWRITE | microbit_propWRITE_WITHOUT | microbit_propNOTIFY;
-#if !CONFIG_ENABLED(MICROBIT_BLE_OPEN)   // ← ペアリング必須のとき
-    props |= microbit_propREADAUTH;      // ← 読み取りに認証を要求する
+#if !CONFIG_ENABLED(MICROBIT_BLE_OPEN)   // <- when pairing is required
+    props |= microbit_propREADAUTH;      // <- require authentication to read
 #endif
 ```
 
-iPad の CoreMIDI は接続直後にサービス探索 → この特性を読みます。認証が済んでいないので **ATT エラー（Insufficient Authentication）** が返り、**iOS は安全のため即座にリンクを切ります**。これが「つながった瞬間に切れる」の正体です。
+iPad's CoreMIDI connects, discovers services, and then reads this characteristic. Authentication has not happened yet, so the board answers with **an ATT error (Insufficient Authentication)** — and **iOS drops the link immediately for safety**. That is exactly what "connects and instantly disconnects" is.
 
-「ペアリング不要」にするとマイコン側で `MICROBIT_BLE_OPEN` が有効になり、認証要求が外れます。同時に **PAIRING MODE 画面も出なくなる**ので、一石二鳥です。
+With "No Pairing Required" the board enables `MICROBIT_BLE_OPEN`, the authentication requirement goes away, and **the PAIRING MODE screen never appears either**.
 
-### 3. iPad 側で接続する
+### 3. Connect from the iPad
 
-1. micro:bit を**普通に起動**する（PAIRING MODE の画面のままにしない。ここで止まっていると MIDI の UUID が広告されず見つかりません）
-2. GarageBand を開き、**ソフトウェア音源（Software Instrument）のトラック**を作る
-3. 設定（歯車）→「詳細」→「Bluetooth MIDI デバイス」
-4. `BBC micro:bit` をタップ → Connect をオン
-5. micro:bit 側に ✓ が出れば接続完了
+1. Boot the micro:bit **normally** (do not leave it on the PAIRING MODE screen — there the MIDI UUID is not advertised and it cannot be found)
+2. Open GarageBand and create a **Software Instrument track**
+3. Settings (gear) → Advanced → Bluetooth MIDI Devices
+4. Tap `BBC micro:bit` → turn Connect on
+5. A ✓ on the micro:bit means you are connected
 
-つながらないときは、iPad 側で「編集」→「忘れる」してから、micro:bit をリセットしてやり直してください。
+If it will not connect, tap Edit → Forget on the iPad, reset the micro:bit, and try again.
 
-## ブロック
+## Blocks
 
-### Setup（準備）
+### Setup
 
-| ブロック | 説明 |
+| Block | Description |
 | --- | --- |
-| `start GarageBand Pad channel [1] instrument [1]` | チャンネルと音色を決めてパッドを開始。Bluetooth の接続状態も LED に出す |
-| `set MIDI channel [1]` | 以後のブロックが使う MIDI チャンネル（1〜16） |
-| `set instrument [1]` | 音色（General MIDI の 1〜128） |
-| `set pad velocity [100]` | パッドが鳴らす音の強さ |
-| `set channel volume [100]` | チャンネル音量（CC7） |
-| `on Bluetooth connected` | つながったときの処理 |
-| `on Bluetooth disconnected` | 切れたときの処理 |
-| `Bluetooth connected` | 接続中かどうか（真偽値） |
+| `start GarageBand Pad channel [1] instrument [1]` | Pick the channel and instrument and start the pads; shows the Bluetooth state on the LED |
+| `set MIDI channel [1]` | MIDI channel used by every other block (1–16) |
+| `set instrument [1]` | Instrument (General MIDI 1–128) |
+| `set pad velocity [100]` | How loud the pads play |
+| `set channel volume [100]` | Channel volume (CC7) |
+| `on Bluetooth connected` | Runs when a device connects |
+| `on Bluetooth disconnected` | Runs when the device disconnects |
+| `Bluetooth connected` | Whether a device is connected right now (boolean) |
 
-### Pads（パッド）
+### Pads
 
-| ブロック | 説明 |
+| Block | Description |
 | --- | --- |
-| `bind pad [A] to note [60]` | 押している間その音を鳴らす。離すと止まる |
-| `bind pad [A] to chord [60] [major]` | 押している間その和音を鳴らす |
-| `on pad [A] pressed` / `on pad [A] released` | パッドの押下／解放で処理を実行（音とは独立に使える） |
-| `pad [A] is pressed` | 今押されているか |
-| `shift pad octave by [1]` / `reset pad octave` | 割り当てた音をまとめてオクターブ移動 |
-| `unbind all pads` | 割り当てを全部消して全音停止 |
+| `bind pad [A] to note [60]` | Play that note for as long as the pad is held; stops on release |
+| `bind pad [A] to chord [60] [major]` | Play that chord for as long as the pad is held |
+| `on pad [A] pressed` / `on pad [A] released` | Run code on press / release (independent of the note binding) |
+| `pad [A] is pressed` | Whether the pad is held right now |
+| `shift pad octave by [1]` / `reset pad octave` | Move every assigned note by whole octaves |
+| `unbind all pads` | Remove all bindings and stop every note |
 
-### Notes（音符）
+### Notes
 
-| ブロック | 説明 |
+| Block | Description |
 | --- | --- |
-| `note [C] octave [4]` | 音名＋オクターブから MIDI ノート番号を作る |
-| `note on [60] velocity [100]` / `note off [60]` | 個別に鳴らす／止める |
-| `play note [60] for [500] ms` | 一定時間鳴らして止める |
-| `play chord [60] [major] for [500] ms` | 和音を一定時間鳴らして止める |
+| `note [C] octave [4]` | Build a MIDI note number from a note name and an octave |
+| `note on [60] velocity [100]` / `note off [60]` | Start / stop a single note |
+| `play note [60] for [500] ms` | Play a note for a while, then stop it |
+| `play chord [60] [major] for [500] ms` | Play a chord for a while, then stop it |
 
-### Expression（表現）
+### Expression
 
-| ブロック | 説明 |
+| Block | Description |
 | --- | --- |
-| `tilt pitch bend [on]` | 左右の傾きでピッチベンド |
-| `tilt modulation [on]` | 傾きでモジュレーション（ビブラート） |
+| `tilt pitch bend [on]` | Bend the pitch by tilting left and right |
+| `tilt modulation [on]` | Add modulation (vibrato) by tilting |
 
 ### Utility
 
-| ブロック | 説明 |
+| Block | Description |
 | --- | --- |
-| `sustain [on]` | サステインペダル（CC64） |
-| `all notes off` | 鳴っている音を全部止めてパッドの状態をリセット |
+| `sustain [on]` | Sustain pedal (CC64) |
+| `all notes off` | Stop everything and reset the pad state |
 
-## サンプルプログラム
+## Example program
 
-A / B / A+B を C メジャーの I–V–vi の 3 コードパッドにして、ロゴを押している間だけ 1 オクターブ上げる例です。
+Turns A / B / A+B into the I–V–vi chords of C major, and shifts everything up one octave while the logo is held.
 
 ```typescript
-// MIDI チャンネル 1、音色 1（アコースティックグランドピアノ）
+// MIDI channel 1, instrument 1 (Acoustic Grand Piano)
 gbpad.start(1, 1)
 
-// 3 つのコードパッド（C メジャー / G メジャー / A マイナー）
+// Three chord pads (C major / G major / A minor)
 gbpad.bindPadChord(MidiPad.A, gbpad.note(NoteName.C, 3), Chord.Major)
 gbpad.bindPadChord(MidiPad.B, gbpad.note(NoteName.G, 3), Chord.Major)
 gbpad.bindPadChord(MidiPad.AB, gbpad.note(NoteName.A, 3), Chord.Minor)
 
-// 傾きでピッチベンド（±2 半音）
+// Pitch bend by tilt (±2 semitones)
 gbpad.tiltPitchBend(OnOff.On)
 
-// ロゴを押している間は 1 オクターブ上
+// Hold the logo to shift up one octave
 gbpad.onPadPressed(MidiPad.Logo, () => gbpad.shiftOctave(1))
 gbpad.onPadReleased(MidiPad.Logo, () => gbpad.shiftOctave(-1))
 
-// 接続状態を表示
+// Show the connection state
 gbpad.onConnected(() => basic.showIcon(IconNames.Happy))
 gbpad.onDisconnected(() => basic.showIcon(IconNames.Sad))
 ```
 
-### ドラムを叩く例
+### Playing drums
 
-MIDI チャンネル 10 がドラム用です。MIDI カテゴリの `midi play drum` ブロックと組み合わせてください。
+MIDI channel 10 is the drum channel. Combine the pads with the `midi play drum` block from the MIDI category.
 
 ```typescript
 gbpad.onPadPressed(MidiPad.A, () => midi.playDrum(DrumSound.AcousticBassDrum))
@@ -156,88 +159,116 @@ gbpad.onPadPressed(MidiPad.B, () => midi.playDrum(DrumSound.AcousticSnare))
 gbpad.onPadPressed(MidiPad.AB, () => midi.playDrum(DrumSound.ClosedHiHat))
 ```
 
-（`DrumSound` と `playDrum` は pxt-midi パッケージのものです。ドラムは MIDI チャンネル 10 固定で送られます。）
+(`DrumSound` and `playDrum` come from the pxt-midi package. Drums are always sent on MIDI channel 10.)
 
-## ハードウェア上の注意
+## Hardware notes
 
-- **A+B パッドは物理的に独立していません。** A と B を同時に押すと、A、B、A+B の 3 パッドが同時に「押された」と判定されます。これは micro:bit のボタンが A と B しかないためで、意図的にキャンセル処理を入れていません。A+B をコードパッドとして使うときは、A と B 側の処理を工夫してください。
-- **ロゴタッチは V2 専用**です。V1 では `Pad.Logo` は常に「押されていない」扱いになります（V1 でクラッシュしないようボード判定を入れています）。
-- パッドの押下検出は 10 ms ごとのポーリングです。`input.onButtonPressed`（＝離した瞬間に発火するクリックイベント）ではなくポーリングにしているのは、「押している間だけ鳴らす」を正確に実現するためです。
-- Bluetooth が切れている間は MIDI メッセージは送られません（送信側で接続チェック済み）。切れたときに音が残らないよう、切断時に自動で全音停止します。
+- **The A+B pad is not physically independent.** Pressing A and B together makes all three of A, B and A+B report "pressed". That is simply because the micro:bit has only the A and B buttons, and there is deliberately no cancellation logic. If you use A+B as a chord pad, design the A and B handlers with that in mind.
+- **Logo touch is V2 only.** On V1, `MidiPad.Logo` always reads as "not pressed" (the code checks the board version so V1 will not crash).
+- Pads are detected by polling every 10 ms. Polling is used instead of `input.onButtonPressed` (which fires on release, i.e. a click) so that "sound only while held" works exactly.
+- MIDI messages are not sent while Bluetooth is down (the transport checks the connection first). On disconnect every note is stopped automatically so nothing is left ringing.
 
-## 実装のしくみと依存関係
+## How it works and what it depends on
 
-このパッケージ自身は**パッド・接続・表現のロジックだけ**を持ち、BLE MIDI の送信そのものは実績のあるパッケージに任せています。
+This package only contains the **pad, connection and expression logic**. Sending BLE MIDI is delegated to battle-tested packages.
 
-| 依存 | 役割 |
+| Dependency | Role |
 | --- | --- |
-| `github:RBilsland/pxt-bluetooth-midi` | BLE MIDI の GATT サービス（`03B80E5A-EDE8-4B33-A751-6CE34EC4C700`）を広告し、MIDI メッセージを notify で送る。**micro:bit V2 (CODAL) 対応** |
-| `github:microsoft/pxt-midi#v2.1.11` | MIDI メッセージの生成（note on/off、和音、CC、ピッチベンド） |
+| `github:RBilsland/pxt-bluetooth-midi` | Advertises the BLE MIDI GATT service (`03B80E5A-EDE8-4B33-A751-6CE34EC4C700`) and sends MIDI messages as notifications. **micro:bit V2 (CODAL) support** |
+| `github:microsoft/pxt-midi#v2.1.11` | Builds the MIDI messages (note on/off, chords, CC, pitch bend) |
 
-> **なぜフォークを使うのか**
-> 公式の `microsoft/pxt-bluetooth-midi` v2.0.13 は nRF51（micro:bit V1）の mbed BLE API（`ble/BLE.h`、`GattService`、`ble.gattServer()`）で書かれています。micro:bit V2 は nRF52833 + CODAL で BLE API が別物なので、**V2 ではコンパイルできません**。MakeCode はこれを検出して error 929（このボードでは使えない拡張機能）を出し、拡張機能を無効化します。RBilsland フォークは v2.0.14 以降で CODAL の `MicroBitBLEService` ベースの実装を追加し、広告・GATT ハンドシェイク・ペアリング設定まで V2 向けに修正しています（v2.0.25 時点）。
+> **Why a fork?**
+> The official `microsoft/pxt-bluetooth-midi` v2.0.13 is written against the nRF51 (micro:bit V1) mbed BLE API (`ble/BLE.h`, `GattService`, `ble.gattServer()`). The micro:bit V2 is an nRF52833 running CODAL, whose BLE API is completely different, so **it does not compile for V2**. MakeCode detects this and reports error 929 ("extension not compatible with this board"), disabling the package. The RBilsland fork added a CODAL `MicroBitBLEService`-based implementation from v2.0.14 onward and fixes advertising, the GATT handshake and the pairing settings for V2 (as of v2.0.25).
 
-## トラブルシューティング
+## Troubleshooting
 
-| 症状 | 対処 |
+| Symptom | What to do |
 | --- | --- |
-| MakeCode で **error 929** が出て拡張機能を追加できない | ボードが **V2** か確認。V1 のプロジェクトには追加できません |
-| GarageBand の「Bluetooth MIDI デバイス」に micro:bit が出ない | micro:bit が **PAIRING MODE 画面のままになっていないか**確認（リセットを押す）。プロジェクト設定の「ペアリング不要」を ON にする。iPad 側で古い登録を「忘れる」 |
-| Connect を押すと **接続中 → 未接続** にすぐ戻る（micro:bit に ✓ が出てすぐ ✕ になる） | → 下の「[接続した瞬間に切れる](#接続した瞬間に切れる)」を実施 |
-| 接続したあと LED に "S" が戻る／顔文字が出て止まる | マイコンが**リセットまたはクラッシュ**しています。ソフトウェアではなく電源・ファームウェア側の問題です（USB 給電で試す、新しい電池にする） |
-| つながっているのに音が出ない | GarageBand で**ソフトウェア音源のトラックが選択されている**か確認。録音待機（赤いボタン）が必要な音源もあります。`midi channel` が 1 になっているか確認 |
-| 音が途中で切れる／遅れる | 2.4 GHz の混雑（Wi-Fi ルーターの近く）を避ける。iPad と micro:bit を近づける |
-| 音が鳴りっぱなしになる | `all notes off` ブロックを呼ぶ。切断時は自動で停止します |
-| 拡張機能を更新したのに反映されない | 拡張機能を一度削除して同じ URL を再度インポートし、**新しい .hex を書き込み直す**（ファームウェアを焼き直さないと反映されません） |
+| MakeCode shows **error 929** and the extension cannot be added | Check the board is **V2**. It cannot be added to a V1 project |
+| The micro:bit does not appear in GarageBand's "Bluetooth MIDI Devices" | Check the board is **not stuck on the PAIRING MODE screen** (press reset). Turn on "No Pairing Required" in Project Settings. Forget the old entry on the iPad |
+| Connect flips back to **Not connected** straight away (the micro:bit shows ✓ then ✕) | Follow [Disconnects immediately after connecting](#disconnects-immediately-after-connecting) below |
+| After connecting, the LED goes back to "S" or shows a sad face and freezes | The board **reset or crashed**. That is a power/firmware problem, not software (try USB power, use a fresh battery) |
+| Connected, but no sound | Check that a **Software Instrument track is selected** in GarageBand. Some instruments need record-enable (the red button). Check `midi channel` is 1 |
+| Sound cuts out or lags | Avoid 2.4 GHz congestion (stay away from Wi-Fi routers). Keep the iPad and micro:bit close together |
+| A note keeps ringing | Call the `all notes off` block. Everything is stopped automatically on disconnect |
+| Updated the extension but nothing changed | Remove the extension, import the same URL again, and **flash a fresh .hex** (the firmware has to be re-flashed) |
 
-### 接続した瞬間に切れる
+### Disconnects immediately after connecting
 
-症状: GarageBand で **接続中** になる → micro:bit に ✓ が出る → 0.5 秒ほどで **未接続** に戻り micro:bit は ✕ になる。
+Symptom: GarageBand shows **Connecting** → the micro:bit shows ✓ → about half a second later it goes back to **Not connected** and the micro:bit shows ✕.
 
-**第一容疑者は「ペアリング設定」です。** 上記「[Bluetooth を「ペアリング不要」にする](#2-bluetooth-をペアリング不要にする必須)」のとおり、`JustWorks pairing` のままだと接続直後の特性読み取りが ATT 認証エラーになり、**iOS 側から切られます**。
+**The prime suspect is the pairing setting.** As described in [Set Bluetooth to "No Pairing Required"](#2-set-bluetooth-to-no-pairing-required-mandatory), while the project is on `JustWorks pairing` the read of the characteristic right after connecting returns an ATT authentication error, and **iOS drops the link**.
 
-次の順番で全部やってください（1 つでも飛ばすと再発します）。
+Do all of these, in this order (skipping any one of them brings the problem back).
 
-1. **MakeCode**: プロジェクトの設定 → Bluetooth → **ペアリング不要** → **新しい .hex をダウンロードして書き込み直す**
-2. **micro:bit**: A/B を押さずに**リセットボタン**を押す（PAIRING MODE 画面から抜ける）
-3. **iPad の Bluetooth 設定**: 「BBC micro:bit」の ⓘ → **このデバイスを削除**（古いペアリング鍵が残っていると iOS はそれを使って失敗し、即切断します）
-4. **GarageBand**: 設定（歯車）→ 詳細 → Bluetooth MIDI デバイス → **編集 → 該当デバイスを削除**（「オフライン」表示の残骸を消す）
-5. iPad の Bluetooth を**オフ → オン**（または iPad を再起動）
-6. micro:bit と iPad を**近づけて**（30 cm 以内）から、もう一度 Connect
+1. **MakeCode**: Project Settings → Bluetooth → **No Pairing Required** → **download a fresh .hex and re-flash**
+2. **micro:bit**: press **reset** without holding A/B (to leave the PAIRING MODE screen)
+3. **iPad Bluetooth settings**: tap ⓘ next to "BBC micro:bit" → **Forget This Device** (a stale pairing key makes iOS use it, fail, and disconnect immediately)
+4. **GarageBand**: Settings (gear) → Advanced → Bluetooth MIDI Devices → **Edit → remove the device** (clears the leftover "offline" entry)
+5. Turn iPad Bluetooth **off → on** (or reboot the iPad)
+6. Move the micro:bit and iPad **close together** (within 30 cm) and press Connect again
 
-#### それでも直らないとき
+#### If that does not fix it
 
-問題が「BLE トランスポート／設定」なのか「このパッケージ（gbpad）」なのかを切り分けます。**`diagnostics/ble-midi-minimal.ts`** を、**`bluetooth-midi` だけをインポートした新規プロジェクト**に貼り付けて焼いてください（gbpad は入れません）。
+Find out whether the problem is the "BLE transport / settings" or "this package (gbpad)".
+Paste the program below into a **new project that imports only `https://github.com/RBilsland/pxt-bluetooth-midi`** (do **not** add gbpad), set "No Pairing Required", and flash it.
 
-- **それでも切れる** → 原因はトランスポート層（`RBilsland/pxt-bluetooth-midi` v2.0.25）かプロジェクト設定側。gbpad は無関係
-- **切れない** → gbpad 側の問題。この README の報告先に症状を伝えてください
+```typescript
+let linkUp = false
 
-切り分けの材料として、次も見ておくと一気に絞れます。
+bluetooth.onBluetoothConnected(function () {
+    linkUp = true
+    basic.showIcon(IconNames.Yes)     // stays on screen - do not clear it
+})
 
-| 見るもの | わかること |
+bluetooth.onBluetoothDisconnected(function () {
+    linkUp = false
+    basic.showIcon(IconNames.No)
+})
+
+input.onButtonPressed(Button.A, function () {
+    basic.showIcon(linkUp ? IconNames.Yes : IconNames.No)
+})
+
+input.onButtonPressed(Button.B, function () {
+    midi.channel(1).noteOn(60, 100)
+    basic.pause(300)
+    midi.channel(1).noteOff(60)
+})
+
+basic.showString("S")   // "S" = the program is running
+```
+
+- **Still disconnects** → the cause is the transport layer (`RBilsland/pxt-bluetooth-midi` v2.0.25) or the project settings. gbpad is not involved
+- **Does not disconnect** → the problem is in gbpad; please report the symptoms
+
+Reading the LED tells you a lot.
+
+| What you see | What it means |
 | --- | --- |
-| 切断後、LED が "S"（起動マーク）に戻る | micro:bit がリセット／クラッシュしている |
-| LED が ✕ のまま固まる | 正常。リンクだけが切れた（iPad 側の都合） |
-| **macOS** の「Audio MIDI Setup → MIDI スタジオ → Bluetooth」から接続しても切れる | micro:bit 側の問題 |
-| macOS では安定、iPad だけ切れる | iPad のキャッシュ／ペアリング鍵の問題（上記 3〜5 を徹底） |
-| 拡張機能一覧の `bluetooth-midi` のバージョン | **v2.0.21 未満なら古い**。削除して再インポートし、.hex を焼き直す |
+| After the disconnect, "S" appears again | The micro:bit reset or crashed |
+| ✕ stays on the display | Normal. Only the link dropped (the iPad's doing) |
+| Drops from **macOS** "Audio MIDI Setup → MIDI Studio → Bluetooth" too | A micro:bit-side problem |
+| Stable on macOS, only the iPad drops | An iPad cache / pairing-key problem (do steps 3–5 thoroughly) |
+| The `bluetooth-midi` version in the extension list | **Anything below v2.0.21 is old.** Remove, re-import, and re-flash |
 
-## ファイル構成
+## Files
 
 ```
 .
-├── pxt.json                     # MakeCode パッケージ定義（依存関係・ファイル一覧）
-├── garageband-pad.ts            # ブロック実装（このパッケージの本体）
-├── tests.ts                     # サンプル／テスト用（インポート時はコンパイルされない）
-├── icon.png                     # 拡張機能アイコン
+├── pxt.json                     # MakeCode package definition (dependencies, file list)
+├── garageband-pad.ts            # Block implementation (the body of this package)
+├── tests.ts                     # Sample / test file (not compiled when imported)
+├── icon.png                     # Extension icon
 ├── tsconfig.json
 ├── _locales/ja/
-│   ├── garageband-pad-strings.json       # ブロック表示の日本語
-│   └── garageband-pad-jsdoc-strings.json # ツールチップの日本語
-└── README.md
+│   ├── garageband-pad-strings.json       # Japanese block labels
+│   └── garageband-pad-jsdoc-strings.json # Japanese tooltips
+├── README.md                    # This file (English)
+└── README.ja.md                 # Japanese version
 ```
 
-## ライセンス
+## License
 
-MIT。依存する [pxt-bluetooth-midi](https://github.com/RBilsland/pxt-bluetooth-midi)（元は [microsoft/pxt-bluetooth-midi](https://github.com/microsoft/pxt-bluetooth-midi)）と [pxt-midi](https://github.com/microsoft/pxt-midi) も MIT です。
-"GarageBand" は Apple Inc. の商標です。本パッケージは Apple とは無関係の非公式なものです。
+MIT. The dependencies [pxt-bluetooth-midi](https://github.com/RBilsland/pxt-bluetooth-midi) (originally [microsoft/pxt-bluetooth-midi](https://github.com/microsoft/pxt-bluetooth-midi)) and [pxt-midi](https://github.com/microsoft/pxt-midi) are MIT as well.
+"GarageBand" is a trademark of Apple Inc. This package is unofficial and not affiliated with Apple.
