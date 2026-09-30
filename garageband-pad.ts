@@ -89,7 +89,7 @@ enum Chord {
 //% icon="\uf001"
 //% color="#F0662B"
 //% weight=80
-//% groups='["Setup", "Pads", "Notes", "Expression", "Utility"]'
+//% groups='["Setup", "Pads", "Notes", "Expression", "Utility", "Classroom"]'
 namespace gbpad {
     const PAD_COUNT = 4;
     const BEND_CENTER = 8192;
@@ -600,5 +600,39 @@ namespace gbpad {
             padActive[i] = [];
             padDown[i] = readPad(i);
         }
+    }
+
+    // ---- classroom ---------------------------------------------------
+
+    /**
+     * The five letter device ID of this micro:bit, for example "zapuv".
+     *
+     * A micro:bit advertises itself over Bluetooth as "BBC micro:bit [zapuv]",
+     * so this is exactly the part inside the brackets that GarageBand shows in
+     * its Bluetooth MIDI device list. Use it to tell several micro:bits apart.
+     *
+     * The ID cannot be changed: it is derived from the chip's serial number.
+     */
+    //% blockId=gbpad_device_id block="device ID"
+    //% shim=control::deviceName
+    //% group="Classroom" weight=90
+    export function deviceId(): string {
+        // The simulator has no chip serial number, so it shows a placeholder.
+        // On the micro:bit this body is replaced by control::deviceName(),
+        // which returns the very same string the Bluetooth name uses.
+        return "simul";
+    }
+
+    /**
+     * Scrolls the device ID of this micro:bit across the LED display.
+     *
+     * Put this in "on start" so that every student can see at a glance which
+     * micro:bit is theirs, and then find the matching "BBC micro:bit [.....]"
+     * entry in the GarageBand device list.
+     */
+    //% blockId=gbpad_show_device_id block="show device ID"
+    //% group="Classroom" weight=88
+    export function showDeviceId(): void {
+        basic.showString(deviceId());
     }
 }

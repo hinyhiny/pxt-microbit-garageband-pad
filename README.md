@@ -65,12 +65,32 @@ iPad's CoreMIDI connects, discovers services, and then reads this characteristic
 
 With "No Pairing Required" the board enables `MICROBIT_BLE_OPEN`, the authentication requirement goes away, and **the PAIRING MODE screen never appears either**.
 
+#### The same setting also decides the Bluetooth name
+
+The micro:bit runtime builds the advertised name like this (`codal-microbit-v2`, `source/bluetooth/MicroBitBLEManager.cpp`):
+
+```cpp
+gapName = MICROBIT_BLE_MODEL;                        // "BBC micro:bit"
+if (enableBonding || !CONFIG_ENABLED(MICROBIT_BLE_WHITELIST)) {
+    gapName = gapName + " [" + deviceName + "]";     // <- the board's own 5 letters
+}
+```
+
+`MICROBIT_BLE_OPEN` forces `MICROBIT_BLE_WHITELIST` to `0` (`inc/MicroBitConfig.h`), and `MicroBitConfig` passes `microbit_friendly_name()` as `deviceName`. So:
+
+| Project setting | Advertised name |
+| --- | --- |
+| **No Pairing Required** (`MICROBIT_BLE_OPEN`) | `BBC micro:bit [zapuv]` — **unique per board** |
+| JustWorks pairing (default) | `BBC micro:bit` — **identical on every board** |
+
+In other words, the mandatory setting above is also what makes the boards in a classroom distinguishable. See [Using many micro:bits at once](#using-many-microbits-at-once-classroom).
+
 ### 3. Connect from the iPad
 
 1. Boot the micro:bit **normally** (do not leave it on the PAIRING MODE screen — there the MIDI UUID is not advertised and it cannot be found)
 2. Open GarageBand and create a **Software Instrument track**
 3. Settings (gear) → Advanced → Bluetooth MIDI Devices
-4. Tap `BBC micro:bit` → turn Connect on
+4. Tap `BBC micro:bit [xxxxx]` (`xxxxx` = the five letters your board shows) → turn Connect on
 5. A ✓ on the micro:bit means you are connected
 
 If it will not connect, tap Edit → Forget on the iPad, reset the micro:bit, and try again.
@@ -124,6 +144,13 @@ If it will not connect, tap Edit → Forget on the iPad, reset the micro:bit, an
 | `sustain [on]` | Sustain pedal (CC64) |
 | `all notes off` | Stop everything and reset the pad state |
 
+### Classroom
+
+| Block | Description |
+| --- | --- |
+| `device ID` | The five letters this micro:bit uses in its Bluetooth name (same value as the advanced `control → device name` block) |
+| `show device ID` | Scroll those five letters across the LED display |
+
 ## Example program
 
 Turns A / B / A+B into the I–V–vi chords of C major, and shifts everything up one octave while the logo is held.
@@ -131,6 +158,10 @@ Turns A / B / A+B into the I–V–vi chords of C major, and shifts everything u
 ```typescript
 // MIDI channel 1, instrument 1 (Acoustic Grand Piano)
 gbpad.start(1, 1)
+
+// Scroll this board's device ID (e.g. "zapuv") so students can find
+// "BBC micro:bit [zapuv]" in the Bluetooth MIDI device list.
+gbpad.showDeviceId()
 
 // Three chord pads (C major / G major / A minor)
 gbpad.bindPadChord(MidiPad.A, gbpad.note(NoteName.C, 3), Chord.Major)
@@ -160,6 +191,30 @@ gbpad.onPadPressed(MidiPad.AB, () => midi.playDrum(DrumSound.ClosedHiHat))
 ```
 
 (`DrumSound` and `playDrum` come from the pxt-midi package. Drums are always sent on MIDI channel 10.)
+
+## Using many micro:bits at once (classroom)
+
+Every micro:bit makes up a **five letter ID from its chip serial number**, and that ID is what shows up in brackets in the Bluetooth name. A micro:bit cannot be renamed — the name is fixed in the runtime — but this ID is unique enough to tell the boards in one room apart.
+
+### Setup
+
+1. Flash **every** board with the **"No Pairing Required"** project setting (see [step 2](#2-set-bluetooth-to-no-pairing-required-mandatory)). Without it every board advertises the plain name `BBC micro:bit` and nobody can tell them apart.
+2. Put `show device ID` in `on start` so each student sees their own ID:
+
+   ```typescript
+   gbpad.start(1, 1)
+   gbpad.showDeviceId()      // scrolls e.g. "zapuv"
+   ```
+
+3. The student boots their board, reads the five letters off the LED, and looks for **`BBC micro:bit [zapuv]`** in GarageBand's Bluetooth MIDI device list (gear → Advanced → Bluetooth MIDI Devices).
+
+### Good to know
+
+- **There are only 5⁵ = 3125 IDs.** With 30 boards in one room there is about a **13%** chance that two of them share an ID (with 15 boards, about 3%). If two candidates appear, connect to one of them and check the LED: **✓ on your own board means you picked the right one.** If not, disconnect and try the other. The built-in ✓ / ✕ icons are the tie-breaker.
+- The ID comes from the chip, so it never changes, and it survives re-flashing.
+- The LED shows the ID in lower case, exactly as it appears in the Bluetooth name.
+- **In the MakeCode simulator** there is no chip serial number, so `device ID` returns the placeholder `simul` / `show device ID` scrolls `simul`. The real ID only exists on the board.
+- iOS remembers devices by address. If you change the Bluetooth setting or hand a board to another student, clear the old entry: GarageBand → Bluetooth MIDI Devices → Edit → delete, and iPad Settings → Bluetooth → forget the micro:bit.
 
 ## Hardware notes
 

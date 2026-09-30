@@ -47,5 +47,13 @@
     "gbpad.tiltPitchBend|block": "傾きでピッチベンド %mode",
     "gbpad.tiltModulation|block": "傾きでモジュレーション %mode",
     "gbpad.sustain|block": "サステインペダル %mode",
-    "gbpad.allNotesOff|block": "すべての音を止める"
+    "gbpad.allNotesOff|block": "すべての音を止める",
+    "gbpad.deviceId|block": "デバイスID",
+    "gbpad.showDeviceId|block": "デバイスIDを表示",
+    "{id:group}Setup": "準備",
+    "{id:group}Pads": "パッド",
+    "{id:group}Notes": "音符",
+    "{id:group}Expression": "表現",
+    "{id:group}Utility": "その他",
+    "{id:group}Classroom": "教室"
 }

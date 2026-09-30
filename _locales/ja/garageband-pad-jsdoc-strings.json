@@ -56,5 +56,7 @@
     "gbpad.tiltModulation|param|mode": "オン / オフ",
     "gbpad.sustain": "サステインペダルを踏む / 離す（MIDI コントロールチェンジ 64）。",
     "gbpad.sustain|param|mode": "オン / オフ",
-    "gbpad.allNotesOff": "鳴っている音を全部止め、パッドの状態もリセットします。"
+    "gbpad.allNotesOff": "鳴っている音を全部止め、パッドの状態もリセットします。",
+    "gbpad.deviceId": "この micro:bit 固有の5文字のデバイスID（例: zapuv）を返します。micro:bit は Bluetooth で「BBC micro:bit [zapuv]」として見えるので、これは GarageBand の Bluetooth MIDI デバイス一覧で [ ] の中に表示される文字列そのものです。複数台を区別するときに使います。ID はチップのシリアル番号から作られるため変更できません。",
+    "gbpad.showDeviceId": "この micro:bit のデバイスIDを LED 表示に流します。「はじめに」に置くと、生徒が自分の micro:bit を見分けて、GarageBand のデバイス一覧から「BBC micro:bit [xxxxx]」を選べます。"
 }

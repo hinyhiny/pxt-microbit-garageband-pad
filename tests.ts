@@ -5,6 +5,10 @@
 // MIDI channel 1, instrument 1 (Acoustic Grand Piano)
 gbpad.start(1, 1)
 
+// Show which micro:bit this is, so students can find their own
+// "BBC micro:bit [xxxxx]" entry in GarageBand's device list.
+gbpad.showDeviceId()
+
 // Three chord pads: I - V - vi in C major, like a tiny song pad
 gbpad.bindPadChord(MidiPad.A, gbpad.note(NoteName.C, 3), Chord.Major)
 gbpad.bindPadChord(MidiPad.B, gbpad.note(NoteName.G, 3), Chord.Major)
