@@ -1,6 +1,6 @@
 # GarageBand Pad — Bluetooth MIDI pad controller for micro:bit V2
 
-![GarageBand Pad](icon.png)
+![GarageBand Pad — Bluetooth MIDI pad controller for micro:bit V2](.github/social-preview.png)
 
 **English** | [日本語](README.ja.md)
 
@@ -309,7 +309,7 @@ This package only contains the **pad, connection and expression logic**. Sending
 | Sound cuts out or lags | Avoid 2.4 GHz congestion (stay away from Wi-Fi routers). Keep the iPad and micro:bit close together |
 | A note keeps ringing | Call the `all notes off` block. Everything is stopped automatically on disconnect |
 | Updated the extension but nothing changed | Remove the extension, import the same URL again, and **flash a fresh .hex** (the firmware has to be re-flashed) |
-| No picture appears next to the extension in the editor | **Expected, for now.** MakeCode shows the `icon.png` from the repository root, but only for extensions on the approved list — there is no `pxt.json` setting for it (`icon` there is for built-in packages only). The file is already the required size (300×200), so it will appear by itself if this extension is ever submitted for approval. Until then the same picture is still visible: it is the one at the top of this page |
+| No picture appears next to the extension in the editor | **Expected, for now.** MakeCode shows the `icon.png` from the repository root, but only for extensions on the approved list — there is no `pxt.json` setting for it (`icon` there is for built-in packages only). The file is already the required size (300×200), so it will appear by itself if this extension is ever submitted for approval. Until then you can still see the picture in the repository: [icon.png](icon.png) |
 
 ### Download for V2 only
 
@@ -407,10 +407,10 @@ One more thing worth knowing: a V2 powers **off** when you hold reset until the 
 ├── pxt.json                     # MakeCode package definition (dependencies, file list)
 ├── garageband-pad.ts            # Block implementation (the body of this package)
 ├── tests.ts                     # Sample / test file (not compiled when imported)
-├── icon.png                     # Extension icon (300x200) — shown at the top of this page
+├── icon.png                     # Extension icon for the MakeCode card (300x200)
 ├── tsconfig.json
 ├── .github/
-│   └── social-preview.png       # Link preview (1280x640), uploaded in the repository settings
+│   └── social-preview.png       # Banner at the top of this page, and the link preview (1280x640)
 ├── _locales/ja/
 │   ├── garageband-pad-strings.json       # Japanese block labels
 │   └── garageband-pad-jsdoc-strings.json # Japanese tooltips
