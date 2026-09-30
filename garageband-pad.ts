@@ -105,8 +105,17 @@ namespace gbpad {
     let connected = false;
     let engineStarted = false;
 
-    // set while a tune is playing, to make it stop early
-    let rtttlStopped = false;
+    // Every "play RTTTL" call takes a ticket, and a tune gives up the moment
+    // the ticket changes. A new tune - or "stop RTTTL" - therefore cuts off
+    // whatever is playing, so tapping the same pad twice restarts the tune
+    // instead of playing two copies on top of each other.
+    let rtttlTicket = 0;
+    // the note the playing tune holds right now, so that a tune being cut off
+    // can let go of it at once; 0 means nothing is held
+    let rtttlSoundingNote = 0;
+    // which ticket owns that note, so that a tune which lost it does not
+    // release a note that has since been handed to somebody else
+    let rtttlSoundingTicket = 0;
     // values read out of the "d=4,o=6,b=63" part of an RTTTL string
     let rtttlBpm = 63;
     let rtttlDefaultDuration = 4;
@@ -671,6 +680,16 @@ namespace gbpad {
         rtttlBpmOverride = limit(bpm, 0, 400);
     }
 
+    // Lets go of the note the playing tune is holding, if it is holding one.
+    // Called when a tune is cut off, so that the note does not ring on.
+    function releaseRtttlNote(): void {
+        if (rtttlSoundingNote > 0) {
+            ctrl().noteOff(rtttlSoundingNote, 0);
+            rtttlSoundingNote = 0;
+            rtttlSoundingTicket = 0;
+        }
+    }
+
     /**
      * Plays a tune written in RTTTL, the ringtone format of old mobile phones.
      *
@@ -678,6 +697,10 @@ namespace gbpad {
      * whatever instrument and channel you picked with "start GarageBand Pad".
      * The block waits until the tune has finished; "stop RTTTL" or
      * "all notes off" cuts it short.
+     *
+     * Only one tune plays at a time: starting a tune stops whatever was
+     * playing, so pressing the same pad twice restarts the tune instead of
+     * playing two copies of it on top of each other.
      *
      * Tunes are easy to find on the web ("rtttl" plus a song title). Smaller
      * "b=" means slower. Use "set RTTTL tempo" to play every tune faster or
@@ -729,11 +752,17 @@ namespace gbpad {
         // is left at 0, in which case the tune plays exactly as written.
         const override = limit(rtttlBpmOverride, 0, 400);
         const wholeMs = 240000 / (override > 0 ? override : rtttlBpm);
-        rtttlStopped = false;
+
+        // Take over from any tune that is already playing: the ticket changes,
+        // so the old tune gives up at its next note, and we let go of the note
+        // it was holding for it.
+        rtttlTicket++;
+        const myTicket = rtttlTicket;
+        releaseRtttlNote();
 
         let p = notesStart;
         while (p < len) {
-            if (rtttlStopped) break;
+            if (myTicket != rtttlTicket) break;
 
             let c = tune.charCodeAt(p);
             if (c == 44 || c == 32 || c == 9 || c == 10 || c == 13) {
@@ -786,8 +815,17 @@ namespace gbpad {
                     hold = ms - gap;
                 }
                 ctrl().noteOn(note, padVelocity);
+                rtttlSoundingNote = note;
+                rtttlSoundingTicket = myTicket;
                 basic.pause(hold);
-                ctrl().noteOff(note, 0);
+                // It is still ours to release only if nothing took over in the
+                // meantime; otherwise the tune that took over has released it
+                // already, and releasing it twice would cut that tune's note.
+                if (rtttlSoundingTicket == myTicket) {
+                    ctrl().noteOff(note, 0);
+                    rtttlSoundingNote = 0;
+                    rtttlSoundingTicket = 0;
+                }
                 if (gap > 0) basic.pause(gap);
             }
         }
@@ -795,11 +833,15 @@ namespace gbpad {
 
     /**
      * Stops the tune that "play RTTTL" is playing.
+     *
+     * The note that is sounding stops at once, rather than being left to ring
+     * until the end of its length.
      */
     //% blockId=gbpad_rtttl_stop block="stop RTTTL"
     //% group="RTTTL" weight=90
     export function stopRtttl(): void {
-        rtttlStopped = true;
+        rtttlTicket++;
+        releaseRtttlNote();
     }
 
     // ---- expression --------------------------------------------------
@@ -848,7 +890,8 @@ namespace gbpad {
     //% group="Utility" weight=78
     export function allNotesOff(): void {
         ensureState();
-        rtttlStopped = true;
+        rtttlTicket++; // a tune that is playing gives up
+        releaseRtttlNote();
         ctrl().channelMode(MidiChannelMode.AllNotesOff);
         ctrl().controlChange(64, 0);
         for (let i = 0; i < PAD_COUNT; i++) {

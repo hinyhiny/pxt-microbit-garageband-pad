@@ -141,7 +141,7 @@ RTTTL ("Ring Tone Text Transfer Language") is the ringtone format old mobile pho
 | --- | --- |
 | `play RTTTL [tune]` | Play a tune and wait until it has finished |
 | `set RTTTL tempo to [120] (bpm)` | Force one tempo on every tune (`0` = keep each tune's own tempo) |
-| `stop RTTTL` | Cut a tune short |
+| `stop RTTTL` | Cut a tune short — the note that is sounding stops at once |
 
 A tune is written like this:
 
@@ -160,6 +160,8 @@ A note is `length + letter + sharp + octave + dot`. So `8e` is an eighth-note E,
 Tune collections are easy to find on the web — search for `rtttl` plus a song title. Paste the line into the block.
 
 Tunes picked up from the web rarely agree on a tempo, so `set RTTTL tempo` overrides all of them at once instead of making you edit every `b=`: `120` plays everything at 120 beats per minute, `60` at half that speed and `240` at twice the speed. `0` means "no override" — each tune keeps the tempo written inside it, which is what happens if you never use the block. Values above 400 are clamped. The setting is remembered, so one `set RTTTL tempo to [90] (bpm)` in `on start` is enough — handy when a class needs everything a little slower.
+
+Only one tune plays at a time. Starting a tune cuts off whatever was playing, so pressing the same pad twice **restarts** the tune instead of laying two copies of it on top of each other — which is what you want when a class is taking turns hammering the pad. `stop RTTTL` silences the note that is sounding straight away, rather than letting it ring out to the end of its length.
 
 ### Expression
 
