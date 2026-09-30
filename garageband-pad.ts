@@ -111,8 +111,8 @@ namespace gbpad {
     let rtttlBpm = 63;
     let rtttlDefaultDuration = 4;
     let rtttlDefaultOctave = 6;
-    // how fast "play RTTTL" plays, in percent of the tempo the tune asks for
-    let rtttlTempo = 100;
+    // tempo of "play RTTTL" in beats per minute; 0 = the tune keeps its own
+    let rtttlBpmOverride = 0;
 
     // notes played by each pad while it is held down
     let padNotes: number[][] = null;
@@ -648,24 +648,27 @@ namespace gbpad {
     }
 
     /**
-     * Sets how fast tunes play, as a percentage of the tempo written inside
-     * them.
+     * Sets the tempo used by "play RTTTL", in beats per minute.
      *
      * Every RTTTL tune carries its own tempo in the "b=" part of its header,
      * but tunes collected from the web rarely agree with each other. This block
-     * scales all of them at once: 100 plays a tune exactly as written, 50 plays
-     * it at half speed (which is what you want when a class is following along)
-     * and 200 plays it twice as fast. The setting is remembered until you
-     * change it, so one "set RTTTL tempo" in "on start" is enough.
+     * overrides all of them: 120 plays every tune at 120 beats per minute, 60
+     * at half that speed (which is what you want when a class is following
+     * along) and 240 at twice the speed.
      *
-     * @param percent the playback speed in percent of the written tempo, eg: 100
+     * Setting it to 0 means "no override": each tune keeps the tempo written
+     * inside it, which is what happens if you never use this block at all. The
+     * setting is remembered until you change it, so one "set RTTTL tempo" in
+     * "on start" is enough.
+     *
+     * @param bpm the tempo in beats per minute, or 0 to use the tempo in the tune
      */
-    //% blockId=gbpad_rtttl_tempo block="set RTTTL tempo to %percent (percent)"
-    //% percent.min=25 percent.max=400 percent.defl=100
+    //% blockId=gbpad_rtttl_tempo block="set RTTTL tempo to %bpm (bpm)"
+    //% bpm.min=0 bpm.max=400 bpm.defl=120
     //% group="RTTTL" weight=95
-    export function setRtttlTempo(percent: number): void {
-        if (isNaN(percent)) return;
-        rtttlTempo = limit(percent, 25, 400);
+    export function setRtttlTempo(bpm: number): void {
+        if (isNaN(bpm)) return;
+        rtttlBpmOverride = limit(bpm, 0, 400);
     }
 
     /**
@@ -722,10 +725,10 @@ namespace gbpad {
         readRtttlDefaults(tune, settingsStart, settingsEnd);
 
         // One whole note in milliseconds; lengths are fractions of it.
-        // "set RTTTL tempo" scales the tempo the tune asks for, so 50 percent
-        // plays it half as fast and 200 percent twice as fast.
-        const bpm = rtttlBpm * limit(rtttlTempo, 25, 400) / 100;
-        const wholeMs = 240000 / bpm;
+        // "set RTTTL tempo" overrides the tempo the tune asks for, unless it
+        // is left at 0, in which case the tune plays exactly as written.
+        const override = limit(rtttlBpmOverride, 0, 400);
+        const wholeMs = 240000 / (override > 0 ? override : rtttlBpm);
         rtttlStopped = false;
 
         let p = notesStart;

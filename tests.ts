@@ -27,9 +27,9 @@ gbpad.onPadPressed(MidiPad.Logo, () => {
     })
 })
 
-// Play every tune at 75% of the tempo it asks for, which is easier to follow
-// along with in a classroom. 100 would be "exactly as written".
-gbpad.setRtttlTempo(75)
+// Play every tune at 90 bpm, which is easier to follow along with in a
+// classroom. 0 would leave each tune at the tempo written inside it.
+gbpad.setRtttlTempo(90)
 
 // Show the Bluetooth state on the display
 gbpad.onConnected(() => {
