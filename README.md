@@ -300,6 +300,7 @@ This package only contains the **pad, connection and expression logic**. Sending
 | It used to work, now GarageBand cannot connect at all (often just after a re-flash) | **Power-cycle the board first**: unplug the USB cable, take the battery out, wait a few seconds, then power up again. Flashing leaves the Bluetooth stack in a stale state often enough that a power cycle — rather than the reset button — is the first thing to try. Nothing in the extension can cause this: the MIDI service starts on its own at power-up |
 | The micro:bit does not appear in GarageBand's "Bluetooth MIDI Devices" | Check the board is **not stuck on the PAIRING MODE screen** (press reset). Turn on "No Pairing Required" in Project Settings. Forget the old entry on the iPad |
 | The list shows plain `BBC micro:bit` with **no `[xxxxx]` suffix** | The **"No Pairing Required" setting is not active** on that board. That is the quickest way to check it: with the setting on, the name always carries the board's five letters. Fix it or every board in the room looks identical — and the sudden-disconnect problem is still there too |
+| The **iPad cannot send the program** to the board over Bluetooth any more | The board's stored Bluetooth state is wedged. Flash a fresh .hex over USB from a computer, and the factory reset program if that is not enough — see [The iPad can no longer send the program over Bluetooth](#the-ipad-can-no-longer-send-the-program-over-bluetooth) |
 | Connect flips back to **Not connected** straight away (the micro:bit shows ✓ then ✕) | Follow [Disconnects immediately after connecting](#disconnects-immediately-after-connecting) below |
 | After connecting, the LED goes back to "S" or shows a sad face and freezes | The board **reset or crashed**. That is a power/firmware problem, not software (try USB power, use a fresh battery) |
 | Connected, but no sound | Check that a **Software Instrument track is selected** in GarageBand. Some instruments need record-enable (the red button). Check `midi channel` is 1 |
@@ -380,6 +381,21 @@ Reading the LED tells you a lot.
 | Drops from **macOS** "Audio MIDI Setup → MIDI Studio → Bluetooth" too | A micro:bit-side problem |
 | Stable on macOS, only the iPad drops | An iPad cache / pairing-key problem (do steps 3–5 thoroughly) |
 | The `bluetooth-midi` version in the extension list | **Anything below v2.0.21 is old.** Remove, re-import, and re-flash |
+
+### The iPad can no longer send the program over Bluetooth
+
+An iPad has no cable option: code reaches the board through the micro:bit app, over Bluetooth. When that stops working, the board's stored Bluetooth state is usually the reason, and the cure is to overwrite it from a computer.
+
+1. **Flash a fresh .hex over USB from a computer.** This is micro:bit's own advice before trying the iPad again. Flashing by dragging a .hex onto the `MICROBIT` drive also **clears all Bluetooth pairing and bonding information and any configuration** (*Reset your micro:bit*, microbit.org). Afterwards, flash this project's .hex again, so that the "No Pairing Required" setting comes back with it.
+2. **If that is not enough, flash the factory reset program.** The `meet the micro:bit` program on the same microbit.org page (the old "Out of Box Experience") "acts like a factory reset" and "will also clear any Bluetooth pairing information on the micro:bit". A board that has gone deaf to Bluetooth normally comes back after this.
+3. **Check that "No Pairing Required" survived.** The setting is compiled into the .hex, so the reset program wipes it. Re-flash this project's .hex and confirm that the device list shows the board's `[xxxxx]` suffix again — see [Installation step 2](#2-set-bluetooth-to-no-pairing-required-mandatory).
+
+Two things that are easy to get wrong with the micro:bit app:
+
+- The board has to be **in Bluetooth mode each time** code is sent: press reset three times, or hold A and B, press and release reset, and keep holding A and B until every LED lights up.
+- **Weak batteries break the radio, not the display.** The board can look perfectly healthy and still refuse to transfer. Use a USB cable or fresh batteries while chasing this.
+
+One more thing worth knowing: a V2 powers **off** when you hold reset until the light goes out (about 4 seconds). That is a cleaner power cycle than unplugging the cable, and it is the first thing to try when Bluetooth misbehaves — see the [troubleshooting table](#troubleshooting).
 
 ## Files
 
