@@ -144,12 +144,12 @@ A tune is written like this:
 
 ```
 Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d
- |  |   |   |    |
- |  |   |   |    +-- the notes, separated by commas
- |  |   |   +------- b = tempo in beats per minute (smaller = slower)
- |  |   +----------- o = the octave used when a note does not say
- |  +--------------- d = the note length used when a note does not say
- +------------------ the name (may be left out)
+ |  |   |   |     |
+ |  |   |   |     +-- the notes, separated by commas
+ |  |   |   +-------- b = the tempo in beats per minute (smaller = slower)
+ |  |   +------------ o = the octave used when a note does not say
+ |  +---------------- d = the note length used when a note does not say
+ +------------------- the name (may be left out)
 ```
 
 A note is `length + letter + sharp + octave + dot`. So `8e` is an eighth-note E, `8c#5` is a C sharp, `4a.` is a dotted quarter-note A and `p` is a rest. The length is a fraction of a whole note, so `4` is a quarter and `8` is an eighth.

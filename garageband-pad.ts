@@ -561,15 +561,17 @@ namespace gbpad {
     // ---- RTTTL -------------------------------------------------------
 
     // RTTTL (Ring Tone Text Transfer Language) is the ringtone format of old
-    // mobile phones. A tune looks like this:
+    // mobile phones. A tune is one line of text with three colon separated
+    // parts - the name, the default settings, and the notes:
     //
     //     Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d
-    //     |   |     |     |   |                                            |
-    //     |   |     |     |   +-- the notes, separated by commas ----------+
-    //     |   |     |     +------ bpm (beats per minute)
-    //     |   |     +------------ the octave used when a note does not say
-    //     |   +------------------ the length used when a note does not say
-    //     +---------------------- the name (often left out)
+    //     ^^^ ^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //     |   |             |
+    //     |   |             +-- notes, separated by commas
+    //     |   +---------------- defaults, all three optional:
+    //     |                     d = note length, o = octave, b = beats per minute
+    //     |                     (4, 6 and 63 when a tune does not say)
+    //     +---------------------- the name, which may be left out entirely
     //
     // A note is "length + letter + sharp + octave + dot", for example 8c#5.
     // The length is a fraction of a whole note: 4 = quarter, 8 = eighth.
