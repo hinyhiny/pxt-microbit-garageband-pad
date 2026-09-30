@@ -6,3 +6,7 @@ pxt_modules
 *.db
 *.tgz
 .DS_Store
+
+# tsc output, if a check is ever run without --noEmit
+/garageband-pad*.js
+/tests.js

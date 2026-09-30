@@ -50,13 +50,16 @@
     "gbpad.playChord|param|root": "和音の根音の MIDI ノート番号（0〜127）",
     "gbpad.playChord|param|chord": "和音の種類",
     "gbpad.playChord|param|duration": "鳴らす長さ（ミリ秒）",
+    "gbpad.playRtttl": "RTTTL（携帯電話の着メロ形式）で書かれた曲を再生します。音符は Bluetooth MIDI で送られるので、「ガレージバンドをはじめる」で選んだチャンネルと音色の音が出ます。曲が終わるまで待ちます。「RTTTL を停止」または「すべての音を止める」で途中でやめられます。曲は Web で「rtttl 曲名」で探せます。`b=` の数字を小さくすると遅くなります。",
+    "gbpad.playRtttl|param|tune": "RTTTL の文字列（例: Ode:d=4,o=5,b=125:8e,8e,8f,8g）",
+    "gbpad.stopRtttl": "「RTTTL を再生」が鳴らしている曲を途中で止めます。",
     "gbpad.tiltPitchBend": "本体を左右に傾けてピッチベンドをかけます。",
     "gbpad.tiltPitchBend|param|mode": "オン / オフ",
     "gbpad.tiltModulation": "本体の傾きでモジュレーション（ビブラート）をかけます。",
     "gbpad.tiltModulation|param|mode": "オン / オフ",
     "gbpad.sustain": "サステインペダルを踏む / 離す（MIDI コントロールチェンジ 64）。",
     "gbpad.sustain|param|mode": "オン / オフ",
-    "gbpad.allNotesOff": "鳴っている音を全部止め、パッドの状態もリセットします。",
+    "gbpad.allNotesOff": "鳴っている音を全部止め、パッドの状態もリセットします。「RTTTL を再生」で鳴っている曲も止まります。",
     "gbpad.deviceId": "この micro:bit 固有の5文字のデバイスID（例: zapuv）を返します。micro:bit は Bluetooth で「BBC micro:bit [zapuv]」として見えるので、これは GarageBand の Bluetooth MIDI デバイス一覧で [ ] の中に表示される文字列そのものです。複数台を区別するときに使います。ID はチップのシリアル番号から作られるため変更できません。",
     "gbpad.showDeviceId": "この micro:bit のデバイスIDを LED 表示に流します。「はじめに」に置くと、生徒が自分の micro:bit を見分けて、GarageBand のデバイス一覧から「BBC micro:bit [xxxxx]」を選べます。"
 }

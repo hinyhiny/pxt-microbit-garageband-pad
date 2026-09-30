@@ -19,6 +19,7 @@ micro:bit V2 ──(BLE MIDI: note on / note off / pitch bend)──> iPad ─�
 | Octave shift | Move every assigned note by whole octaves, switchable while you play |
 | Tilt pitch bend | Tilt the board left/right to bend the pitch (±2 semitones) |
 | Tilt modulation | Tilt to add vibrato (CC1) |
+| RTTTL player | Play a whole song from a one-line ringtone string (e.g. Ode to Joy) |
 | Connection display | Check mark on the LED when the iPad connects, cross when it drops |
 | Utilities | Sustain, all notes off, channel volume, pad velocity |
 
@@ -130,6 +131,31 @@ If it will not connect, tap Edit → Forget on the iPad, reset the micro:bit, an
 | `play note [60] for [500] ms` | Play a note for a while, then stop it |
 | `play chord [60] [major] for [500] ms` | Play a chord for a while, then stop it |
 
+### RTTTL (ringtones)
+
+RTTTL ("Ring Tone Text Transfer Language") is the ringtone format old mobile phones used. A whole tune is a single line of text, and it is played through Bluetooth MIDI, so it comes out of GarageBand with whatever instrument and channel you picked.
+
+| Block | Description |
+| --- | --- |
+| `play RTTTL [tune]` | Play a tune and wait until it has finished |
+| `stop RTTTL` | Cut a tune short |
+
+A tune is written like this:
+
+```
+Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d
+ |  |   |   |    |
+ |  |   |   |    +-- the notes, separated by commas
+ |  |   |   +------- b = tempo in beats per minute (smaller = slower)
+ |  |   +----------- o = the octave used when a note does not say
+ |  +--------------- d = the note length used when a note does not say
+ +------------------ the name (may be left out)
+```
+
+A note is `length + letter + sharp + octave + dot`. So `8e` is an eighth-note E, `8c#5` is a C sharp, `4a.` is a dotted quarter-note A and `p` is a rest. The length is a fraction of a whole note, so `4` is a quarter and `8` is an eighth.
+
+Tune collections are easy to find on the web — search for `rtttl` plus a song title. Paste the line into the block.
+
 ### Expression
 
 | Block | Description |
@@ -142,7 +168,7 @@ If it will not connect, tap Edit → Forget on the iPad, reset the micro:bit, an
 | Block | Description |
 | --- | --- |
 | `sustain [on]` | Sustain pedal (CC64) |
-| `all notes off` | Stop everything and reset the pad state |
+| `all notes off` | Stop everything (including a tune) and reset the pad state |
 
 ### Classroom
 
@@ -191,6 +217,24 @@ gbpad.onPadPressed(MidiPad.AB, () => midi.playDrum(DrumSound.ClosedHiHat))
 ```
 
 (`DrumSound` and `playDrum` come from the pxt-midi package. Drums are always sent on MIDI channel 10.)
+
+### Playing a whole tune
+
+`play RTTTL` waits until the tune is over, so `on start` and `forever` are the natural places for it. To start a tune **from a pad**, wrap it in the built-in `run in background` block from the Control category — otherwise the pad poller stops for as long as the tune lasts and the other pads go dead.
+
+```typescript
+const TUNE = "Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d"
+
+gbpad.onPadPressed(MidiPad.Logo, () => {
+    control.inBackground(() => gbpad.playRtttl(TUNE))
+})
+gbpad.onPadPressed(MidiPad.A, () => gbpad.stopRtttl())
+```
+
+Two knobs are worth knowing:
+
+- **Tempo** is the `b=` number in the tune. Smaller is slower, which is what you want when a class is following along.
+- **Pitch** is the `o=` number (and any per-note octave). If a tune sits too high for the instrument you picked, drop the octave.
 
 ## Using many micro:bits at once (classroom)
 

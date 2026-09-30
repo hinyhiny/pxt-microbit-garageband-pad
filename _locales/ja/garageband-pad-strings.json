@@ -44,6 +44,8 @@
     "gbpad.noteOff|block": "音符 %note を止める",
     "gbpad.playNote|block": "音符 %note|を %duration ミリ秒鳴らす",
     "gbpad.playChord|block": "和音 %root|%chord|を %duration ミリ秒鳴らす",
+    "gbpad.playRtttl|block": "RTTTL %tune を再生",
+    "gbpad.stopRtttl|block": "RTTTL を停止",
     "gbpad.tiltPitchBend|block": "傾きでピッチベンド %mode",
     "gbpad.tiltModulation|block": "傾きでモジュレーション %mode",
     "gbpad.sustain|block": "サステインペダル %mode",
@@ -53,6 +55,7 @@
     "{id:group}Setup": "準備",
     "{id:group}Pads": "パッド",
     "{id:group}Notes": "音符",
+    "{id:group}RTTTL": "RTTTL（着メロ）",
     "{id:group}Expression": "表現",
     "{id:group}Utility": "その他",
     "{id:group}Classroom": "教室"

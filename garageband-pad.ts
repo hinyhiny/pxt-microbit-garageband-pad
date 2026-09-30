@@ -89,11 +89,13 @@ enum Chord {
 //% icon="\uf001"
 //% color="#F0662B"
 //% weight=80
-//% groups='["Setup", "Pads", "Notes", "Expression", "Utility", "Classroom"]'
+//% groups='["Setup", "Pads", "Notes", "RTTTL", "Expression", "Utility", "Classroom"]'
 namespace gbpad {
     const PAD_COUNT = 4;
     const BEND_CENTER = 8192;
     const BEND_RANGE = 4096; // ~2 semitones at the default bend range
+    const RTTTL_MIN_NOTE_MS = 15; // shorter notes than this would swamp Bluetooth
+    const RTTTL_GAP_MS = 15;      // a small gap, so a repeated note is heard twice
 
     // ---- state -------------------------------------------------------
 
@@ -102,6 +104,13 @@ namespace gbpad {
     let octaveShift = 0;
     let connected = false;
     let engineStarted = false;
+
+    // set while a tune is playing, to make it stop early
+    let rtttlStopped = false;
+    // values read out of the "d=4,o=6,b=63" part of an RTTTL string
+    let rtttlBpm = 63;
+    let rtttlDefaultDuration = 4;
+    let rtttlDefaultOctave = 6;
 
     // notes played by each pad while it is held down
     let padNotes: number[][] = null;
@@ -549,6 +558,218 @@ namespace gbpad {
         }
     }
 
+    // ---- RTTTL -------------------------------------------------------
+
+    // RTTTL (Ring Tone Text Transfer Language) is the ringtone format of old
+    // mobile phones. A tune looks like this:
+    //
+    //     Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d
+    //     |   |     |     |   |                                            |
+    //     |   |     |     |   +-- the notes, separated by commas ----------+
+    //     |   |     |     +------ bpm (beats per minute)
+    //     |   |     +------------ the octave used when a note does not say
+    //     |   +------------------ the length used when a note does not say
+    //     +---------------------- the name (often left out)
+    //
+    // A note is "length + letter + sharp + octave + dot", for example 8c#5.
+    // The length is a fraction of a whole note: 4 = quarter, 8 = eighth.
+    //
+    // The parsing below walks the string once, character by character, and
+    // sends each note straight out over Bluetooth MIDI. It never builds
+    // substrings, because the micro:bit runs out of memory quickly.
+
+    /**
+     * Lower-cases an ASCII character code, so "C" and "c" are the same note.
+     */
+    function lower(code: number): number {
+        return code >= 65 && code <= 90 ? code + 32 : code;
+    }
+
+    /**
+     * The MIDI note number of an RTTTL pitch. RTTTL puts middle C in octave 4,
+     * which is the same convention as the "note" block above, so both agree on
+     * where a note sits. Returns 0 for anything that is not a note.
+     */
+    function rtttlNote(letter: number, sharp: boolean, octave: number): number {
+        let step = -1;
+        switch (letter) {
+            case 99: step = 0; break;    // c
+            case 100: step = 2; break;   // d
+            case 101: step = 4; break;   // e
+            case 102: step = 5; break;   // f
+            case 103: step = 7; break;   // g
+            case 97: step = 9; break;    // a
+            case 98: step = 11; break;   // b
+        }
+        if (step < 0) return 0;          // "p" (pause), or something unknown
+        if (sharp) step++;
+        return limit((limit(octave, 0, 8) + 1) * 12 + step, 0, 127);
+    }
+
+    /**
+     * Reads "d=4,o=6,b=63" into rtttlDefaultDuration / rtttlDefaultOctave /
+     * rtttlBpm, keeping the RTTTL defaults for anything that is missing.
+     */
+    function readRtttlDefaults(tune: string, start: number, end: number): void {
+        rtttlDefaultDuration = 4;
+        rtttlDefaultOctave = 6;
+        rtttlBpm = 63;
+
+        let p = start;
+        while (p < end) {
+            // the key is the one character in front of the "=", which makes
+            // spaces around the separators harmless
+            while (p < end && tune.charCodeAt(p) != 61 /* = */) p++;
+            if (p >= end) break;
+            const key = p > start ? lower(tune.charCodeAt(p - 1)) : 0;
+            p++;
+
+            let value = 0;
+            let digits = 0;
+            while (p < end) {
+                const c = tune.charCodeAt(p);
+                if (c < 48 || c > 57) break;
+                value = value * 10 + (c - 48);
+                digits++;
+                p++;
+            }
+            if (digits > 0) {
+                if (key == 100 /* d */ && value > 0) rtttlDefaultDuration = value;
+                else if (key == 111 /* o */ && value <= 8) rtttlDefaultOctave = value;
+                else if (key == 98 /* b */ && value > 0) rtttlBpm = value;
+            }
+            while (p < end && (tune.charCodeAt(p) == 44 /* , */ || tune.charCodeAt(p) == 32)) p++;
+        }
+        if (rtttlBpm < 1) rtttlBpm = 63;
+    }
+
+    /**
+     * Plays a tune written in RTTTL, the ringtone format of old mobile phones.
+     *
+     * The notes go out over Bluetooth MIDI, so they come out of GarageBand with
+     * whatever instrument and channel you picked with "start GarageBand Pad".
+     * The block waits until the tune has finished; "stop RTTTL" or
+     * "all notes off" cuts it short.
+     *
+     * Tunes are easy to find on the web ("rtttl" plus a song title). Smaller
+     * "b=" means slower.
+     *
+     * @param tune an RTTTL string, eg: "Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f"
+     */
+    //% blockId=gbpad_rtttl_play block="play RTTTL %tune"
+    //% tune.defl="Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d"
+    //% group="RTTTL" weight=100
+    export function playRtttl(tune: string): void {
+        if (!tune) return;
+        const len = tune.length;
+        if (len < 4) return;
+
+        // The header is "Name:defaults:", but the name is often left out, so
+        // work out from the text itself which of the two we are looking at.
+        let firstColon = 0;
+        while (firstColon < len && tune.charCodeAt(firstColon) != 58 /* : */) firstColon++;
+        if (firstColon >= len) return; // no header at all: not an RTTTL string
+
+        let settingsStart = 0;
+        let settingsEnd = 0;
+        let notesStart = 0;
+        let hasEquals = false;
+        for (let i = 0; i < firstColon; i++) {
+            if (tune.charCodeAt(i) == 61 /* = */) {
+                hasEquals = true;
+                break;
+            }
+        }
+        if (hasEquals) {
+            // "d=4,o=6,b=63:notes" - the name was left out
+            settingsEnd = firstColon;
+            notesStart = firstColon + 1;
+        } else {
+            // "Name:d=4,o=6,b=63:notes" - the usual form, two colons
+            let secondColon = firstColon + 1;
+            while (secondColon < len && tune.charCodeAt(secondColon) != 58) secondColon++;
+            if (secondColon >= len) return; // a name but no defaults section
+            settingsStart = firstColon + 1;
+            settingsEnd = secondColon;
+            notesStart = secondColon + 1;
+        }
+        readRtttlDefaults(tune, settingsStart, settingsEnd);
+
+        // one whole note in milliseconds; lengths are fractions of it
+        const wholeMs = 240000 / rtttlBpm;
+        rtttlStopped = false;
+
+        let p = notesStart;
+        while (p < len) {
+            if (rtttlStopped) break;
+
+            let c = tune.charCodeAt(p);
+            if (c == 44 || c == 32 || c == 9 || c == 10 || c == 13) {
+                p++; // comma, space, tab or newline between notes
+                continue;
+            }
+
+            let fraction = 0;
+            while (p < len) {
+                c = tune.charCodeAt(p);
+                if (c < 48 || c > 57) break;
+                fraction = fraction * 10 + (c - 48);
+                p++;
+            }
+            if (fraction < 1) fraction = rtttlDefaultDuration;
+
+            let letter = 0;
+            if (p < len) {
+                letter = lower(tune.charCodeAt(p));
+                p++;
+            }
+            let sharp = false;
+            if (p < len && tune.charCodeAt(p) == 35 /* # */) {
+                sharp = true;
+                p++;
+            }
+            let octave = rtttlDefaultOctave;
+            if (p < len && tune.charCodeAt(p) >= 48 && tune.charCodeAt(p) <= 57) {
+                octave = tune.charCodeAt(p) - 48;
+                p++;
+            }
+            let dotted = false;
+            if (p < len && tune.charCodeAt(p) == 46 /* . */) {
+                dotted = true;
+                p++;
+            }
+
+            let ms = Math.round(wholeMs / fraction);
+            if (dotted) ms = Math.round(ms * 1.5);
+            if (ms < RTTTL_MIN_NOTE_MS) ms = RTTTL_MIN_NOTE_MS;
+
+            const note = rtttlNote(letter, sharp, octave);
+            if (note <= 0) {
+                basic.pause(ms); // a pause, or a character we cannot play
+            } else {
+                let hold = ms;
+                let gap = 0;
+                if (ms > 2 * RTTTL_GAP_MS) {
+                    gap = RTTTL_GAP_MS;
+                    hold = ms - gap;
+                }
+                ctrl().noteOn(note, padVelocity);
+                basic.pause(hold);
+                ctrl().noteOff(note, 0);
+                if (gap > 0) basic.pause(gap);
+            }
+        }
+    }
+
+    /**
+     * Stops the tune that "play RTTTL" is playing.
+     */
+    //% blockId=gbpad_rtttl_stop block="stop RTTTL"
+    //% group="RTTTL" weight=90
+    export function stopRtttl(): void {
+        rtttlStopped = true;
+    }
+
     // ---- expression --------------------------------------------------
 
     /**
@@ -589,11 +810,13 @@ namespace gbpad {
 
     /**
      * Stops every sounding note and clears the pad state.
+     * A tune started with "play RTTTL" is stopped too.
      */
     //% blockId=gbpad_all_notes_off block="all notes off"
     //% group="Utility" weight=78
     export function allNotesOff(): void {
         ensureState();
+        rtttlStopped = true;
         ctrl().channelMode(MidiChannelMode.AllNotesOff);
         ctrl().controlChange(64, 0);
         for (let i = 0; i < PAD_COUNT; i++) {
