@@ -406,9 +406,10 @@ One more thing worth knowing: a V2 powers **off** when you hold reset until the 
 .
 ├── pxt.json                     # MakeCode package definition (dependencies, file list)
 ├── garageband-pad.ts            # Block implementation (the body of this package)
-├── tests.ts                     # Sample / test file (not compiled when imported)
+├── test.ts                      # Sample / test file (not compiled when imported)
 ├── icon.png                     # Extension icon for the MakeCode card (300x200)
 ├── tsconfig.json
+├── LICENSE.txt                  # MIT
 ├── .github/
 │   └── social-preview.png       # Banner at the top of this page, and the link preview (1280x640)
 ├── _locales/ja/
@@ -422,3 +423,8 @@ One more thing worth knowing: a V2 powers **off** when you hold reset until the 
 
 MIT. The dependencies [pxt-bluetooth-midi](https://github.com/RBilsland/pxt-bluetooth-midi) (originally [microsoft/pxt-bluetooth-midi](https://github.com/microsoft/pxt-bluetooth-midi)) and [pxt-midi](https://github.com/microsoft/pxt-midi) are MIT as well.
 "GarageBand" is a trademark of Apple Inc. This package is unofficial and not affiliated with Apple.
+
+#### Metadata (used for search)
+
+* for PXT/microbit
+

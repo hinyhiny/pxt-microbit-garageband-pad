@@ -17,7 +17,7 @@
         "_locales/ja/garageband-pad-jsdoc-strings.json"
     ],
     "testFiles": [
-        "tests.ts"
+        "test.ts"
     ],
     "public": true,
     "supportedTargets": [

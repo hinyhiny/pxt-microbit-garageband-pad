@@ -404,9 +404,10 @@ micro:bit アプリで間違えやすい点が 2 つあります。
 .
 ├── pxt.json                     # MakeCode パッケージ定義（依存関係・ファイル一覧）
 ├── garageband-pad.ts            # ブロック実装（このパッケージの本体）
-├── tests.ts                     # サンプル／テスト用（インポート時はコンパイルされない）
+├── test.ts                      # サンプル／テスト用（インポート時はコンパイルされない）
 ├── icon.png                     # 拡張機能アイコン（300×200）— MakeCode の一覧カード用
 ├── tsconfig.json
+├── LICENSE.txt                  # MIT
 ├── .github/
 │   └── social-preview.png       # このページ先頭のバナー兼リンクプレビュー用（1280×640）
 ├── _locales/ja/
@@ -420,3 +421,8 @@ micro:bit アプリで間違えやすい点が 2 つあります。
 
 MIT。依存する [pxt-bluetooth-midi](https://github.com/RBilsland/pxt-bluetooth-midi)（元は [microsoft/pxt-bluetooth-midi](https://github.com/microsoft/pxt-bluetooth-midi)）と [pxt-midi](https://github.com/microsoft/pxt-midi) も MIT です。
 "GarageBand" は Apple Inc. の商標です。本パッケージは Apple とは無関係の非公式なものです。
+
+#### メタデータ（検索用）
+
+* for PXT/microbit
+
