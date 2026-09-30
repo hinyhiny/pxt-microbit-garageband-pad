@@ -241,6 +241,7 @@ This package only contains the **pad, connection and expression logic**. Sending
 | --- | --- |
 | MakeCode shows **error 929** and the extension cannot be added | Check the board is **V2**. It cannot be added to a V1 project |
 | The micro:bit does not appear in GarageBand's "Bluetooth MIDI Devices" | Check the board is **not stuck on the PAIRING MODE screen** (press reset). Turn on "No Pairing Required" in Project Settings. Forget the old entry on the iPad |
+| The list shows plain `BBC micro:bit` with **no `[xxxxx]` suffix** | The **"No Pairing Required" setting is not active** on that board. That is the quickest way to check it: with the setting on, the name always carries the board's five letters. Fix it or every board in the room looks identical — and the sudden-disconnect problem is still there too |
 | Connect flips back to **Not connected** straight away (the micro:bit shows ✓ then ✕) | Follow [Disconnects immediately after connecting](#disconnects-immediately-after-connecting) below |
 | After connecting, the LED goes back to "S" or shows a sad face and freezes | The board **reset or crashed**. That is a power/firmware problem, not software (try USB power, use a fresh battery) |
 | Connected, but no sound | Check that a **Software Instrument track is selected** in GarageBand. Some instruments need record-enable (the red button). Check `midi channel` is 1 |
