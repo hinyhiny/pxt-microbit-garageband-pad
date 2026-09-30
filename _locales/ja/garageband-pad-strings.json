@@ -45,6 +45,7 @@
     "gbpad.playNote|block": "音符 %note|を %duration ミリ秒鳴らす",
     "gbpad.playChord|block": "和音 %root|%chord|を %duration ミリ秒鳴らす",
     "gbpad.playRtttl|block": "RTTTL %tune を再生",
+    "gbpad.setRtttlTempo|block": "RTTTL のテンポを %percent パーセント にする",
     "gbpad.stopRtttl|block": "RTTTL を停止",
     "gbpad.tiltPitchBend|block": "傾きでピッチベンド %mode",
     "gbpad.tiltModulation|block": "傾きでモジュレーション %mode",

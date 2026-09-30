@@ -1,6 +1,6 @@
 {
     "name": "garageband-pad",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Bluetooth (BLE) MIDI pad controller for the micro:bit V2: hold the buttons to play GarageBand on an iPad",
     "license": "MIT",
     "dependencies": {

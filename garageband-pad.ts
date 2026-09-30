@@ -111,6 +111,8 @@ namespace gbpad {
     let rtttlBpm = 63;
     let rtttlDefaultDuration = 4;
     let rtttlDefaultOctave = 6;
+    // how fast "play RTTTL" plays, in percent of the tempo the tune asks for
+    let rtttlTempo = 100;
 
     // notes played by each pad while it is held down
     let padNotes: number[][] = null;
@@ -646,6 +648,27 @@ namespace gbpad {
     }
 
     /**
+     * Sets how fast tunes play, as a percentage of the tempo written inside
+     * them.
+     *
+     * Every RTTTL tune carries its own tempo in the "b=" part of its header,
+     * but tunes collected from the web rarely agree with each other. This block
+     * scales all of them at once: 100 plays a tune exactly as written, 50 plays
+     * it at half speed (which is what you want when a class is following along)
+     * and 200 plays it twice as fast. The setting is remembered until you
+     * change it, so one "set RTTTL tempo" in "on start" is enough.
+     *
+     * @param percent the playback speed in percent of the written tempo, eg: 100
+     */
+    //% blockId=gbpad_rtttl_tempo block="set RTTTL tempo to %percent (percent)"
+    //% percent.min=25 percent.max=400 percent.defl=100
+    //% group="RTTTL" weight=95
+    export function setRtttlTempo(percent: number): void {
+        if (isNaN(percent)) return;
+        rtttlTempo = limit(percent, 25, 400);
+    }
+
+    /**
      * Plays a tune written in RTTTL, the ringtone format of old mobile phones.
      *
      * The notes go out over Bluetooth MIDI, so they come out of GarageBand with
@@ -654,7 +677,8 @@ namespace gbpad {
      * "all notes off" cuts it short.
      *
      * Tunes are easy to find on the web ("rtttl" plus a song title). Smaller
-     * "b=" means slower.
+     * "b=" means slower. Use "set RTTTL tempo" to play every tune faster or
+     * slower without editing the tune itself.
      *
      * @param tune an RTTTL string, eg: "Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f"
      */
@@ -697,8 +721,11 @@ namespace gbpad {
         }
         readRtttlDefaults(tune, settingsStart, settingsEnd);
 
-        // one whole note in milliseconds; lengths are fractions of it
-        const wholeMs = 240000 / rtttlBpm;
+        // One whole note in milliseconds; lengths are fractions of it.
+        // "set RTTTL tempo" scales the tempo the tune asks for, so 50 percent
+        // plays it half as fast and 200 percent twice as fast.
+        const bpm = rtttlBpm * limit(rtttlTempo, 25, 400) / 100;
+        const wholeMs = 240000 / bpm;
         rtttlStopped = false;
 
         let p = notesStart;

@@ -19,7 +19,7 @@ micro:bit V2 ──(BLE MIDI: note on / note off / pitch bend)──> iPad ─�
 | Octave shift | Move every assigned note by whole octaves, switchable while you play |
 | Tilt pitch bend | Tilt the board left/right to bend the pitch (±2 semitones) |
 | Tilt modulation | Tilt to add vibrato (CC1) |
-| RTTTL player | Play a whole song from a one-line ringtone string (e.g. Ode to Joy) |
+| RTTTL player | Play a whole song from a one-line ringtone string (e.g. Ode to Joy), with a tempo control |
 | Connection display | Check mark on the LED when the iPad connects, cross when it drops |
 | Utilities | Sustain, all notes off, channel volume, pad velocity |
 
@@ -138,6 +138,7 @@ RTTTL ("Ring Tone Text Transfer Language") is the ringtone format old mobile pho
 | Block | Description |
 | --- | --- |
 | `play RTTTL [tune]` | Play a tune and wait until it has finished |
+| `set RTTTL tempo to [100] (percent)` | Speed every tune up or down (`100` = play it as written) |
 | `stop RTTTL` | Cut a tune short |
 
 A tune is written like this:
@@ -155,6 +156,8 @@ Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d
 A note is `length + letter + sharp + octave + dot`. So `8e` is an eighth-note E, `8c#5` is a C sharp, `4a.` is a dotted quarter-note A and `p` is a rest. The length is a fraction of a whole note, so `4` is a quarter and `8` is an eighth.
 
 Tune collections are easy to find on the web — search for `rtttl` plus a song title. Paste the line into the block.
+
+Tunes picked up from the web rarely agree on a tempo, so `set RTTTL tempo` scales all of them at once instead of making you edit every `b=`. `100` is "as written", `50` is half speed and `200` is twice as fast; anything below 25 or above 400 is clamped. The setting is remembered, so one `set RTTTL tempo to [75] (percent)` in `on start` is enough — handy when a class needs everything a little slower.
 
 ### Expression
 
@@ -225,16 +228,20 @@ gbpad.onPadPressed(MidiPad.AB, () => midi.playDrum(DrumSound.ClosedHiHat))
 ```typescript
 const TUNE = "Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d"
 
+// 75% of whatever tempo each tune asks for
+gbpad.setRtttlTempo(75)
+
 gbpad.onPadPressed(MidiPad.Logo, () => {
     control.inBackground(() => gbpad.playRtttl(TUNE))
 })
 gbpad.onPadPressed(MidiPad.A, () => gbpad.stopRtttl())
 ```
 
-Two knobs are worth knowing:
+Three knobs are worth knowing:
 
-- **Tempo** is the `b=` number in the tune. Smaller is slower, which is what you want when a class is following along.
+- **Tempo** is the `b=` number in the tune. Smaller is slower, which is what you want when a class is following along. `set RTTTL tempo` scales it without touching the tune.
 - **Pitch** is the `o=` number (and any per-note octave). If a tune sits too high for the instrument you picked, drop the octave.
+- **One tune only** — `set RTTTL tempo` is a single global setting. To play one tune faster and leave the rest as written, either put a `set RTTTL tempo` call in front of each `play RTTTL`, or edit the `b=` inside that tune's text.
 
 ## Using many micro:bits at once (classroom)
 
