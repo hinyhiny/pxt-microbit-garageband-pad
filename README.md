@@ -29,6 +29,8 @@ micro:bit V2 ──(BLE MIDI: note on / note off / pitch bend)──> iPad ─�
 - Microsoft MakeCode for micro:bit (makecode.microbit.org)
 - GarageBand on iPad / iPhone (a version that supports Bluetooth MIDI devices)
 
+MakeCode asks **"Download for V2 only"** when you download. That is normal for this extension — see [Download for V2 only](#download-for-v2-only).
+
 ## Installation
 
 ### 1. Import the extension
@@ -292,6 +294,7 @@ This package only contains the **pad, connection and expression logic**. Sending
 | Symptom | What to do |
 | --- | --- |
 | MakeCode shows **error 929** and the extension cannot be added | Check the board is **V2**. It cannot be added to a V1 project |
+| Downloading asks whether to **"Download for V2 only"** | Expected, and the right answer. The V1 half cannot fit the Bluetooth stack — see [Download for V2 only](#download-for-v2-only) |
 | The micro:bit does not appear in GarageBand's "Bluetooth MIDI Devices" | Check the board is **not stuck on the PAIRING MODE screen** (press reset). Turn on "No Pairing Required" in Project Settings. Forget the old entry on the iPad |
 | The list shows plain `BBC micro:bit` with **no `[xxxxx]` suffix** | The **"No Pairing Required" setting is not active** on that board. That is the quickest way to check it: with the setting on, the name always carries the board's five letters. Fix it or every board in the room looks identical — and the sudden-disconnect problem is still there too |
 | Connect flips back to **Not connected** straight away (the micro:bit shows ✓ then ✕) | Follow [Disconnects immediately after connecting](#disconnects-immediately-after-connecting) below |
@@ -300,6 +303,21 @@ This package only contains the **pad, connection and expression logic**. Sending
 | Sound cuts out or lags | Avoid 2.4 GHz congestion (stay away from Wi-Fi routers). Keep the iPad and micro:bit close together |
 | A note keeps ringing | Call the `all notes off` block. Everything is stopped automatically on disconnect |
 | Updated the extension but nothing changed | Remove the extension, import the same URL again, and **flash a fresh .hex** (the firmware has to be re-flashed) |
+
+### Download for V2 only
+
+MakeCode normally hands you a **universal .hex**: one file holding both a V1 and a V2 image, so it works on either board. That means the program has to fit on **both**, and the V1 has far less room than the V2:
+
+| Variant | Usable flash |
+| --- | --- |
+| micro:bit V1 (`mbdal`) | 242,688 bytes |
+| micro:bit V2 (`mbcodal`) | 471,040 bytes |
+
+A Bluetooth MIDI stack does not fit in 242,688 bytes, so the V1 half cannot be built. MakeCode says as much — *"your program is too large to fit on a micro:bit V1"* — and offers **Download for V2 only**. Take it: the file it produces holds the V2 image only, which is what you want here and is smaller than a universal .hex.
+
+- This is how the editor behaves, **not a problem with your program**. Any Bluetooth MIDI project on a micro:bit shows it, and there is no way to make the V1 half fit.
+- Plug the micro:bit V2 in and use the normal **Download** button (WebUSB one-click flash) and the prompt does not appear: MakeCode can see it is talking to a V2 and rebuilds V2-only on its own.
+- A V2-only .hex will **not run on a V1**, and a V1 fails silently — no error code, nothing on the display. Fine when every board in the room is a V2; worth remembering if one is not.
 
 ### Disconnects immediately after connecting
 
