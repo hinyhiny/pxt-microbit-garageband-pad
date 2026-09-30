@@ -41,11 +41,26 @@ micro:bit V2 ──(BLE MIDI: note on / note off / pitch bend)──> iPad ─�
 
 5. ブロック一覧に **GarageBand Pad** カテゴリが出れば成功
 
-### 2. ペアリング不要モードにする（強く推奨）
+### 2. Bluetooth を「ペアリング不要」にする（**必須**）
 
-歯車（設定）→「ペアリング不要: Bluetooth で誰でも接続できる」を **オン** → 保存 → ダウンロード。
+歯車（設定）→「プロジェクトの設定」→ **Bluetooth** を **「ペアリング不要: Bluetooth で誰でも接続できる」** にする。
 
-micro:bit V2 は「ペアリング必須」だと iPad の GarageBand から見つからないことがあります。個人で 1 台だけつなぐなら「ペアリング不要」が確実です。
+**この設定は .hex に焼き込まれます。設定を変えただけでは何も変わりません。設定後に必ず「ダウンロード」して .hex を書き込み直してください。**
+
+#### なぜ必須なのか
+
+MakeCode の既定値は **「JustWorks pairing」** です。この状態では BLE MIDI の文字特性（characteristic）に「**読み取りに認証が必要**」というフラグが付きます。これは `bluetooth-midi` のネイティブ実装が次のように書いているためです。
+
+```cpp
+uint16_t props = microbit_propREAD | microbit_propWRITE | microbit_propWRITE_WITHOUT | microbit_propNOTIFY;
+#if !CONFIG_ENABLED(MICROBIT_BLE_OPEN)   // ← ペアリング必須のとき
+    props |= microbit_propREADAUTH;      // ← 読み取りに認証を要求する
+#endif
+```
+
+iPad の CoreMIDI は接続直後にサービス探索 → この特性を読みます。認証が済んでいないので **ATT エラー（Insufficient Authentication）** が返り、**iOS は安全のため即座にリンクを切ります**。これが「つながった瞬間に切れる」の正体です。
+
+「ペアリング不要」にするとマイコン側で `MICROBIT_BLE_OPEN` が有効になり、認証要求が外れます。同時に **PAIRING MODE 画面も出なくなる**ので、一石二鳥です。
 
 ### 3. iPad 側で接続する
 
@@ -168,11 +183,44 @@ gbpad.onPadPressed(MidiPad.AB, () => midi.playDrum(DrumSound.ClosedHiHat))
 | --- | --- |
 | MakeCode で **error 929** が出て拡張機能を追加できない | ボードが **V2** か確認。V1 のプロジェクトには追加できません |
 | GarageBand の「Bluetooth MIDI デバイス」に micro:bit が出ない | micro:bit が **PAIRING MODE 画面のままになっていないか**確認（リセットを押す）。プロジェクト設定の「ペアリング不要」を ON にする。iPad 側で古い登録を「忘れる」 |
-| Connect を押してもすぐ Connect に戻る | 一度「忘れる」→ micro:bit をリセット → GarageBand を再起動。Bluetooth を入れ直す |
+| Connect を押すと **接続中 → 未接続** にすぐ戻る（micro:bit に ✓ が出てすぐ ✕ になる） | → 下の「[接続した瞬間に切れる](#接続した瞬間に切れる)」を実施 |
+| 接続したあと LED に "S" が戻る／顔文字が出て止まる | マイコンが**リセットまたはクラッシュ**しています。ソフトウェアではなく電源・ファームウェア側の問題です（USB 給電で試す、新しい電池にする） |
 | つながっているのに音が出ない | GarageBand で**ソフトウェア音源のトラックが選択されている**か確認。録音待機（赤いボタン）が必要な音源もあります。`midi channel` が 1 になっているか確認 |
 | 音が途中で切れる／遅れる | 2.4 GHz の混雑（Wi-Fi ルーターの近く）を避ける。iPad と micro:bit を近づける |
 | 音が鳴りっぱなしになる | `all notes off` ブロックを呼ぶ。切断時は自動で停止します |
 | 拡張機能を更新したのに反映されない | 拡張機能を一度削除して同じ URL を再度インポートし、**新しい .hex を書き込み直す**（ファームウェアを焼き直さないと反映されません） |
+
+### 接続した瞬間に切れる
+
+症状: GarageBand で **接続中** になる → micro:bit に ✓ が出る → 0.5 秒ほどで **未接続** に戻り micro:bit は ✕ になる。
+
+**第一容疑者は「ペアリング設定」です。** 上記「[Bluetooth を「ペアリング不要」にする](#2-bluetooth-をペアリング不要にする必須)」のとおり、`JustWorks pairing` のままだと接続直後の特性読み取りが ATT 認証エラーになり、**iOS 側から切られます**。
+
+次の順番で全部やってください（1 つでも飛ばすと再発します）。
+
+1. **MakeCode**: プロジェクトの設定 → Bluetooth → **ペアリング不要** → **新しい .hex をダウンロードして書き込み直す**
+2. **micro:bit**: A/B を押さずに**リセットボタン**を押す（PAIRING MODE 画面から抜ける）
+3. **iPad の Bluetooth 設定**: 「BBC micro:bit」の ⓘ → **このデバイスを削除**（古いペアリング鍵が残っていると iOS はそれを使って失敗し、即切断します）
+4. **GarageBand**: 設定（歯車）→ 詳細 → Bluetooth MIDI デバイス → **編集 → 該当デバイスを削除**（「オフライン」表示の残骸を消す）
+5. iPad の Bluetooth を**オフ → オン**（または iPad を再起動）
+6. micro:bit と iPad を**近づけて**（30 cm 以内）から、もう一度 Connect
+
+#### それでも直らないとき
+
+問題が「BLE トランスポート／設定」なのか「このパッケージ（gbpad）」なのかを切り分けます。**`diagnostics/ble-midi-minimal.ts`** を、**`bluetooth-midi` だけをインポートした新規プロジェクト**に貼り付けて焼いてください（gbpad は入れません）。
+
+- **それでも切れる** → 原因はトランスポート層（`RBilsland/pxt-bluetooth-midi` v2.0.25）かプロジェクト設定側。gbpad は無関係
+- **切れない** → gbpad 側の問題。この README の報告先に症状を伝えてください
+
+切り分けの材料として、次も見ておくと一気に絞れます。
+
+| 見るもの | わかること |
+| --- | --- |
+| 切断後、LED が "S"（起動マーク）に戻る | micro:bit がリセット／クラッシュしている |
+| LED が ✕ のまま固まる | 正常。リンクだけが切れた（iPad 側の都合） |
+| **macOS** の「Audio MIDI Setup → MIDI スタジオ → Bluetooth」から接続しても切れる | micro:bit 側の問題 |
+| macOS では安定、iPad だけ切れる | iPad のキャッシュ／ペアリング鍵の問題（上記 3〜5 を徹底） |
+| 拡張機能一覧の `bluetooth-midi` のバージョン | **v2.0.21 未満なら古い**。削除して再インポートし、.hex を焼き直す |
 
 ## ファイル構成
 
