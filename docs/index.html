@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GarageBand Pad — 仕様とヘルプ</title>
+<style>
+  :root{
+    --bg:#131519; --panel:#1a1d23; --panel2:#22262f; --line:#2d323d;
+    --fg:#e9ecf1; --muted:#98a2b3; --dim:#6f7a8a;
+    --accent:#F0662B; --blue:#5aa9ff; --green:#39d98a; --yellow:#ffd166; --pink:#ff7ab6;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:16px/1.8 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:56px 28px 120px}
+  header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:40px}
+  h1{font-size:30px;line-height:1.35;margin:0 0 10px;letter-spacing:.01em}
+  h1 span{color:var(--accent)}
+  .lede{color:var(--muted);margin:0 0 18px;max-width:70ch}
+  .badges{display:flex;flex-wrap:wrap;gap:8px}
+  .badge{
+    font-size:12.5px;letter-spacing:.02em;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--panel);
+  }
+  .badge b{color:var(--fg);font-weight:600}
+  h2{font-size:22px;margin:64px 0 6px;padding-top:10px}
+  h2 .num{color:var(--accent);font-size:14px;font-weight:600;letter-spacing:.08em;display:block;margin-bottom:4px}
+  h3{font-size:16.5px;margin:34px 0 8px;color:var(--fg)}
+  p{margin:10px 0}
+  a{color:var(--blue)}
+  code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:.9em}
+  p code,li code,td code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+  .muted{color:var(--muted)}
+  .small{font-size:13.5px}
+  figure{margin:26px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px 8px}
+  figure svg{display:block;width:100%;height:auto}
+  figcaption{font-size:13px;color:var(--muted);padding:10px 4px 8px;line-height:1.7}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.04em;border-bottom-color:#39404d}
+  tr:hover td{background:#1c2027}
+  td code{white-space:nowrap}
+  .g{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--panel2)}
+  pre{
+    background:#101317;border:1px solid var(--line);border-radius:12px;
+    padding:18px 18px;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13.5px;line-height:1.65;margin:18px 0;
+  }
+  pre .n{color:var(--yellow)} pre .k{color:var(--blue)} pre .v{color:var(--green)}
+  pre .p{color:var(--dim)} pre .c{color:var(--muted)}
+  .note{
+    background:linear-gradient(180deg,#1d2027,#1a1d23);border:1px solid var(--line);
+    border-left:3px solid var(--accent);border-radius:10px;padding:14px 18px;margin:22px 0;
+  }
+  .note.warn{border-left-color:var(--yellow)}
+  .note.ok{border-left-color:var(--green)}
+  .note p:first-child{margin-top:0} .note p:last-child{margin-bottom:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card h4{margin:0 0 6px;font-size:14px;color:var(--accent);letter-spacing:.02em}
+  .card p{margin:4px 0;font-size:13.5px;color:var(--muted)}
+  .kpi{font-size:24px;font-weight:600;color:var(--fg);line-height:1.3}
+  .kpi small{font-size:12.5px;color:var(--dim);font-weight:400;display:block}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:36px}
+  .toc li{margin:3px 0;font-size:14px}
+  footer{margin-top:72px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:13px}
+  @media (max-width:700px){ .toc ol{columns:1} .wrap{padding:36px 18px 80px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>GarageBand Pad — <span>仕様とヘルプ</span></h1>
+  <p class="lede">
+    micro:bit V2 のボタンを Bluetooth MIDI のパッドにして、iPad の GarageBand を鳴らす
+    MakeCode 拡張機能です。このページは「どう動くか（仕様）」と「どう使うか（ヘルプ）」を
+    1 枚にまとめたものです。
+  </p>
+  <div class="badges">
+    <span class="badge"><b>micro:bit V2</b> 専用</span>
+    <span class="badge">BLE MIDI</span>
+    <span class="badge"><b>30</b> ブロック / 7 グループ</span>
+    <span class="badge">MIT</span>
+    <span class="badge">v1.2.0</span>
+    <span class="badge">日英ヘルプ同梱</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#s1">システム構成</a></li>
+    <li><a href="#s2">パッドの仕様</a></li>
+    <li><a href="#s3">ブロック一覧（30 個）</a></li>
+    <li><a href="#s4">MIDI の対応表</a></li>
+    <li><a href="#s5">RTTTL の仕様</a></li>
+    <li><a href="#s6">同時に鳴る曲は 1 つ</a></li>
+    <li><a href="#s7">接続と状態</a></li>
+    <li><a href="#s8">傾きの割り当て</a></li>
+    <li><a href="#s9">教室での運用</a></li>
+    <li><a href="#s10">既知の制限・検証状況</a></li>
+  </ol>
+</nav>
+
+<h2 id="s1"><span class="num">01</span>システム構成</h2>
+
+<p>
+  音は iPad 側で作ります。micro:bit が Bluetooth で送るのは「この音を鳴らせ / 止めろ」
+  という指示だけで、音声そのものは流れません。だからスピーカーもオーディオケーブルも
+  要りません。
+</p>
+
+<figure>
+<svg viewBox="0 0 900 250" role="img" aria-label="micro:bit から iPad の GarageBand へ BLE MIDI で指示を送り、音は iPad から出る構成図">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#F0662B"/>
+    </marker>
+    <marker id="a1b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5aa9ff"/>
+    </marker>
+  </defs>
+
+  <rect x="18" y="58" width="212" height="136" rx="12" fill="#22262f" stroke="#2d323d"/>
+  <text x="124" y="88" fill="#e9ecf1" font-size="15" font-weight="600" text-anchor="middle">micro:bit V2</text>
+  <text x="124" y="112" fill="#98a2b3" font-size="12.5" text-anchor="middle">A / B / A+B / ロゴ（タッチ）</text>
+  <text x="124" y="134" fill="#98a2b3" font-size="12.5" text-anchor="middle">10 ms ごとにボタンを見る</text>
+  <rect x="44" y="150" width="160" height="28" rx="7" fill="#1a1d23" stroke="#2d323d"/>
+  <text x="124" y="169" fill="#F0662B" font-size="12.5" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">gbpad</text>
+
+  <line x1="238" y1="126" x2="392" y2="126" stroke="#F0662B" stroke-width="2" marker-end="url(#a1)"/>
+  <text x="315" y="106" fill="#F0662B" font-size="13" font-weight="600" text-anchor="middle">BLE MIDI</text>
+  <text x="315" y="150" fill="#98a2b3" font-size="11.5" text-anchor="middle">note on / note off</text>
+  <text x="315" y="167" fill="#98a2b3" font-size="11.5" text-anchor="middle">pitch bend / CC1 / CC7 / CC64</text>
+
+  <rect x="398" y="58" width="228" height="136" rx="12" fill="#22262f" stroke="#2d323d"/>
+  <text x="512" y="88" fill="#e9ecf1" font-size="15" font-weight="600" text-anchor="middle">iPad</text>
+  <rect x="420" y="102" width="184" height="72" rx="9" fill="#1a1d23" stroke="#2d323d"/>
+  <text x="512" y="128" fill="#5aa9ff" font-size="13.5" text-anchor="middle">GarageBand</text>
+  <text x="512" y="148" fill="#98a2b3" font-size="11.5" text-anchor="middle">ソフトウェア音源トラック</text>
+  <text x="512" y="165" fill="#98a2b3" font-size="11.5" text-anchor="middle">チャンネル 1〜16 / 音色 1〜128</text>
+
+  <line x1="632" y1="126" x2="760" y2="126" stroke="#5aa9ff" stroke-width="2" marker-end="url(#a1b)"/>
+  <text x="696" y="112" fill="#98a2b3" font-size="12" text-anchor="middle">音</text>
+
+  <rect x="766" y="86" width="118" height="80" rx="12" fill="#1a1d23" stroke="#2d323d"/>
+  <text x="825" y="120" fill="#e9ecf1" font-size="13" text-anchor="middle">スピーカー</text>
+  <text x="825" y="140" fill="#98a2b3" font-size="11.5" text-anchor="middle">ヘッドホン</text>
+</svg>
+<figcaption>
+  指示だけが Bluetooth を渡ります。Bluetooth が落ちている間は MIDI を送りません
+  （接続を確認してから送る作りです）。
+</figcaption>
+</figure>
+
+<div class="grid">
+  <div class="card">
+    <h4>BLE MIDI サービス</h4>
+    <p>UUID <code>03B80E5A-EDE8-4B33-A751-6CE34EC4C700</code></p>
+    <p>広告名は <code>BBC micro:bit [zapuv]</code></p>
+  </div>
+  <div class="card">
+    <h4>送るメッセージ</h4>
+    <p>Note On / Note Off / Program Change / CC1 / CC7 / CC64 / Pitch Bend / All Notes Off</p>
+  </div>
+  <div class="card">
+    <h4>ポーリング周期</h4>
+    <p>パッド 10 ms / 傾き 25 ms</p>
+    <p>「押している間だけ鳴る」を成立させるため、押下イベントではなくポーリングです</p>
+  </div>
+</div>
+
+<h2 id="s2"><span class="num">02</span>パッドの仕様</h2>
+
+<p>
+  パッドは <b>4 か所</b>。押している間ずっと鳴り、離した瞬間に止まります。
+  ボタンの「クリック」ではなく、鍵盤を押さえている状態に近い動きです。
+</p>
+
+<figure>
+<svg viewBox="0 0 900 300" role="img" aria-label="パッドの位置と、押してから離すまでの音符の鳴り方を示す図">
+  <rect x="24" y="30" width="272" height="212" rx="16" fill="#22262f" stroke="#2d323d"/>
+  <text x="160" y="58" fill="#98a2b3" font-size="12" text-anchor="middle">本体（表側）</text>
+
+  <rect x="58" y="86" width="66" height="56" rx="10" fill="#1a1d23" stroke="#F0662B" stroke-width="1.5"/>
+  <text x="91" y="121" fill="#F0662B" font-size="17" font-weight="600" text-anchor="middle">A</text>
+
+  <rect x="196" y="86" width="66" height="56" rx="10" fill="#1a1d23" stroke="#F0662B" stroke-width="1.5"/>
+  <text x="229" y="121" fill="#F0662B" font-size="17" font-weight="600" text-anchor="middle">B</text>
+
+  <path d="M160 178 L180 198 L160 218 L140 198 z" fill="#1a1d23" stroke="#ffd166" stroke-width="1.5"/>
+  <text x="160" y="203" fill="#ffd166" font-size="11.5" text-anchor="middle">ロゴ</text>
+
+  <text x="310" y="118" fill="#98a2b3" font-size="12.5">A+B = A と B の同時押し</text>
+  <text x="310" y="140" fill="#98a2b3" font-size="12.5">ロゴは金色のタッチマーク（V2 のみ）</text>
+  <text x="310" y="162" fill="#98a2b3" font-size="12.5">割り当てるまで、押しても何も送りません</text>
+
+  <line x1="24" y1="272" x2="876" y2="272" stroke="#2d323d" stroke-width="1"/>
+  <text x="24" y="292" fill="#6f7a8a" font-size="11.5">時間 →</text>
+
+  <circle cx="330" cy="272" r="4" fill="#39d98a"/>
+  <text x="330" y="252" fill="#39d98a" font-size="12" text-anchor="middle">押す</text>
+  <circle cx="700" cy="272" r="4" fill="#ff7ab6"/>
+  <text x="700" y="252" fill="#ff7ab6" font-size="12" text-anchor="middle">離す</text>
+
+  <rect x="330" y="216" width="370" height="12" rx="6" fill="#F0662B" opacity="0.85"/>
+  <text x="515" y="212" fill="#e9ecf1" font-size="12.5" text-anchor="middle">鳴り続けている</text>
+
+  <line x1="330" y1="272" x2="330" y2="196" stroke="#39d98a" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <line x1="700" y1="272" x2="700" y2="196" stroke="#ff7ab6" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <text x="330" y="190" fill="#39d98a" font-size="11.5" text-anchor="middle">note on</text>
+  <text x="700" y="190" fill="#ff7ab6" font-size="11.5" text-anchor="middle">note off</text>
+
+  <text x="24" y="196" fill="#98a2b3" font-size="12">強さは</text>
+  <text x="24" y="214" fill="#F0662B" font-size="12" font-family="ui-monospace,Menlo,monospace">set pad velocity</text>
+</svg>
+<figcaption>
+  検出は 10 ms ごと。<code>input.onButtonPressed</code> は<b>離したときに発火する</b>（＝クリック）ので使わず、
+  ポーリングで「押している間だけ鳴る」を成立させています。
+</figcaption>
+</figure>
+
+<div class="note warn">
+  <p>
+    <b>A+B は物理的に独立していません。</b> A と B を同時に押すと、A・B・A+B の 3 つが同時に
+    「押されている」状態になります。micro:bit にボタンが 2 つしかないためで、
+    打ち消す処理は<b>意図的に入れていません</b>。A+B を和音パッドに使うときは、
+    A と B の処理もそれを前提に設計してください。
+  </p>
+</div>
+
+<h2 id="s3"><span class="num">03</span>ブロック一覧（30 個 / 7 グループ）</h2>
+
+<p class="muted small">
+  エディタでの表示名（英語版）と、日本語版の表示名です。右クリック → <b>ヘルプ</b> で
+  各グループの解説ページが開きます。
+</p>
+
+<h3><span class="g">Setup（準備）</span> 8 ブロック</h3>
+<table>
+  <tr><th style="width:37%">ブロック（英語）</th><th style="width:28%">日本語</th><th>説明</th></tr>
+  <tr><td><code>start GarageBand Pad</code> ch <code>1</code> inst <code>1</code></td><td>ガレージバンドをはじめる</td><td>チャンネルと音色を選んでパッドを開始。LED に接続状態を出す</td></tr>
+  <tr><td><code>set MIDI channel 1</code></td><td>MIDIチャンネルを 1 にする</td><td>他の全ブロックが送るチャンネル（1〜16）</td></tr>
+  <tr><td><code>set instrument 1</code></td><td>音色を 1 にする</td><td>General MIDI の音色（1〜128）</td></tr>
+  <tr><td><code>set pad velocity 100</code></td><td>パッドの音の強さを 100 にする</td><td>音の強さ（1〜127）。RTTTL にも効く</td></tr>
+  <tr><td><code>set channel volume 100</code></td><td>チャンネルの音量を 100 にする</td><td>チャンネル全体の音量（CC7、0〜127）</td></tr>
+  <tr><td><code>on Bluetooth connected</code></td><td>Bluetoothが接続されたとき</td><td>接続時に実行する処理</td></tr>
+  <tr><td><code>on Bluetooth disconnected</code></td><td>Bluetoothが切断されたとき</td><td>切断時に実行する処理</td></tr>
+  <tr><td><code>Bluetooth connected</code></td><td>Bluetoothが接続されている</td><td>今つながっているかを返す（真偽値）</td></tr>
+</table>
+
+<h3><span class="g">Pads（パッド）</span> 8 ブロック</h3>
+<table>
+  <tr><th style="width:37%">ブロック（英語）</th><th style="width:28%">日本語</th><th>説明</th></tr>
+  <tr><td><code>bind pad A to note 60</code></td><td>パッド Aボタン に音符 60 を割り当てる</td><td>押している間その音符を鳴らす</td></tr>
+  <tr><td><code>bind pad A to chord 60 major</code></td><td>パッド Aボタン に和音 60 メジャー を割り当てる</td><td>押している間その和音を鳴らす</td></tr>
+  <tr><td><code>on pad A pressed</code></td><td>パッド Aボタン が押されたとき</td><td>音符の割り当てとは独立に動く</td></tr>
+  <tr><td><code>on pad A released</code></td><td>パッド Aボタン が離されたとき</td><td>同上</td></tr>
+  <tr><td><code>pad A is pressed</code></td><td>パッド Aボタン が押されている</td><td>今押されているかを返す</td></tr>
+  <tr><td><code>shift pad octave by 1</code></td><td>パッドのオクターブを 1 ずらす</td><td>割り当てを変えずに音程だけ動かす（−4〜4）</td></tr>
+  <tr><td><code>reset pad octave</code></td><td>パッドのオクターブを元に戻す</td><td>ずれを 0 に戻す</td></tr>
+  <tr><td><code>unbind all pads</code></td><td>パッドの割り当てを全部消す</td><td>全割り当てを消して音も止める</td></tr>
+</table>
+
+<h3><span class="g">Notes（音符）</span> 5 ブロック</h3>
+<table>
+  <tr><th style="width:37%">ブロック（英語）</th><th style="width:28%">日本語</th><th>説明</th></tr>
+  <tr><td><code>note C octave 4</code></td><td>音符 ド (C) オクターブ 4</td><td>音名とオクターブからノート番号を作る</td></tr>
+  <tr><td><code>note on 60 velocity 100</code></td><td>音符 60 を鳴らす 強さ 100</td><td>止めるまで鳴り続ける</td></tr>
+  <tr><td><code>note off 60</code></td><td>音符 60 を止める</td><td>鳴っている音符を止める</td></tr>
+  <tr><td><code>play note 60 for 500 ms</code></td><td>音符 60 を 500 ミリ秒鳴らす</td><td>鳴らしっぱなしを防ぐ。<b>待つブロック</b></td></tr>
+  <tr><td><code>play chord 60 major for 500 ms</code></td><td>和音 60 メジャー を 500 ミリ秒鳴らす</td><td>同上</td></tr>
+</table>
+
+<h3><span class="g">RTTTL</span> 3 ブロック</h3>
+<table>
+  <tr><th style="width:37%">ブロック（英語）</th><th style="width:28%">日本語</th><th>説明</th></tr>
+  <tr><td><code>play RTTTL &lt;tune&gt;</code></td><td>RTTTL &lt;tune&gt; を再生</td><td>曲を再生。<b>終わるまで待つ</b></td></tr>
+  <tr><td><code>set RTTTL tempo to 120 (bpm)</code></td><td>RTTTL のテンポを 120 BPM にする</td><td>全曲のテンポを上書き（0〜400、0 で上書きなし）</td></tr>
+  <tr><td><code>stop RTTTL</code></td><td>RTTTL を停止</td><td>鳴っている音もその場で消す</td></tr>
+</table>
+
+<h3><span class="g">Expression（表現）</span> 2 ブロック / <span class="g">Utility（その他）</span> 2 ブロック</h3>
+<table>
+  <tr><th style="width:37%">ブロック（英語）</th><th style="width:28%">日本語</th><th>説明</th></tr>
+  <tr><td><code>tilt pitch bend on</code></td><td>傾きでピッチベンド オン</td><td>左右の傾きで音程を曲げる（±2 半音）</td></tr>
+  <tr><td><code>tilt modulation on</code></td><td>傾きでモジュレーション オン</td><td>傾きでビブラート（CC1）</td></tr>
+  <tr><td><code>sustain on</code></td><td>サステインペダル オン</td><td>サステインペダル（CC64）</td></tr>
+  <tr><td><code>all notes off</code></td><td>すべての音を止める</td><td>全部止めてパッドの状態もリセット。鳴っている曲も止まる</td></tr>
+</table>
+
+<h3><span class="g">Classroom（教室）</span> 2 ブロック</h3>
+<table>
+  <tr><th style="width:37%">ブロック（英語）</th><th style="width:28%">日本語</th><th>説明</th></tr>
+  <tr><td><code>device ID</code></td><td>デバイスID</td><td>Bluetooth 名の <code>[ ]</code> の中身 5 文字（例 <code>zapuv</code>）</td></tr>
+  <tr><td><code>show device ID</code></td><td>デバイスIDを表示</td><td>LED に流して見せる</td></tr>
+</table>
+
+<div class="note">
+  <p><b>待つブロックは 3 つだけです</b>（<code>play note</code> / <code>play chord</code> / <code>play RTTTL</code>）。
+  これらは鳴り終わるまで次に進みません。パッドから曲を鳴らすときは、Control カテゴリの
+  <b>「背景で実行」</b>で包んでください。包まないと、曲が終わるまでパッドを見に行けなくなり、
+  他のパッドが反応しなくなります。</p>
+</div>
+
+<h2 id="s4"><span class="num">04</span>MIDI の対応表</h2>
+
+<table>
+  <tr><th style="width:30%">項目</th><th style="width:22%">範囲</th><th>動き</th></tr>
+  <tr><td>MIDI チャンネル</td><td>1〜16（既定 1）</td><td>全ブロック共通。範囲外は丸める。チャンネル 10 はドラム</td></tr>
+  <tr><td>音色（プログラム）</td><td>1〜128（既定 1）</td><td>送るときに <code>−1</code> して 0〜127 にする</td></tr>
+  <tr><td>ノート番号</td><td>0〜127</td><td><code>(オクターブ + 1) × 12 + 音名</code>。60 が真ん中のド</td></tr>
+  <tr><td>ベロシティ</td><td>1〜127（既定 100）</td><td>パッドと RTTTL が使う</td></tr>
+  <tr><td>音量（CC7）</td><td>0〜127（既定 100）</td><td>チャンネル全体</td></tr>
+  <tr><td>モジュレーション（CC1）</td><td>0〜127</td><td>傾き <code>-90°</code> → 0、<code>+90°</code> → 127</td></tr>
+  <tr><td>サステイン（CC64）</td><td>オン 127 / オフ 0</td><td>ペダルの踏み込み</td></tr>
+  <tr><td>ピッチベンド</td><td>中央 8192 ± 4096</td><td>傾き <code>±90°</code> で ±4096（既定のベンドレンジで約 ±2 半音）</td></tr>
+  <tr><td>オクターブシフト</td><td>−6〜+6 オクターブ</td><td>押した瞬間に <code>ノート + シフト × 12</code> して 0〜127 に丸める</td></tr>
+</table>
+
+<h3>和音の構成音</h3>
+<table>
+  <tr><th style="width:22%">和音</th><th style="width:30%">根音からの半音</th><th>例（根音 60 = 真ん中のド）</th></tr>
+  <tr><td>major（メジャー）</td><td>0, 4, 7</td><td>60, 64, 67</td></tr>
+  <tr><td>minor（マイナー）</td><td>0, 3, 7</td><td>60, 63, 67</td></tr>
+  <tr><td>7th（セブンス）</td><td>0, 4, 7, 10</td><td>60, 64, 67, 70</td></tr>
+  <tr><td>sus4（サスフォー）</td><td>0, 5, 7</td><td>60, 65, 67</td></tr>
+  <tr><td>power（パワーコード）</td><td>0, 7</td><td>60, 67</td></tr>
+  <tr><td>octave（オクターブ）</td><td>0, 12</td><td>60, 72</td></tr>
+</table>
+
+<h2 id="s5"><span class="num">05</span>RTTTL の仕様</h2>
+
+<p>
+  RTTTL（Ring Tone Text Transfer Language）は昔の携帯電話の着メロ形式です。
+  1 曲が <b>1 行の文字列</b>で、そのまま Bluetooth MIDI で送られます。
+</p>
+
+<h3>文字列の構造</h3>
+<pre><span class="n">Ode</span><span class="p"> : </span><span class="k">d</span><span class="p">=</span><span class="v">4</span><span class="p">,</span><span class="k">o</span><span class="p">=</span><span class="v">5</span><span class="p">,</span><span class="k">b</span><span class="p">=</span><span class="v">125</span><span class="p"> : </span><span class="v">8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d</span>
+
+ <span class="n">名前</span>          <span class="k">既定値</span>                      <span class="v">音符の並び</span>
+（省略可）   d = 長さ / o = オクターブ      カンマ区切り
+             b = 1 分あたりの拍数
+             （書かれていなければ 4 / 6 / 63）</pre>
+
+<pre>    <span class="v">8</span> <span class="k">c</span> <span class="p">#</span> <span class="v">5</span> <span class="p">.</span>
+    │ │ │ │ └─ 付点: 長さを 1.5 倍にする
+    │ │ │ └─── オクターブ（<span class="k">o=</span> と同じなら省略）
+    │ │ └───── <span class="p">#</span> はシャープ
+    │ └─────── 音名 a〜g（<span class="k">c</span> と <span class="k">C</span> は同じ）
+    └───────── 長さ: 全音符の分数（4 = 4分、8 = 8分、16 = 16分）
+
+  <span class="p">p</span> = 休符</pre>
+
+<h3>音の長さの計算</h3>
+
+<figure>
+<svg viewBox="0 0 900 250" role="img" aria-label="RTTTL のテンポから各音符の長さが決まり、音符の後ろに 15 ミリ秒の無音が入ることを示す図">
+  <text x="20" y="34" fill="#e9ecf1" font-size="14" font-weight="600">テンポから長さが決まる</text>
+  <text x="20" y="62" fill="#98a2b3" font-size="13">全音符 = 240000 ÷ BPM</text>
+  <text x="20" y="84" fill="#6f7a8a" font-size="12.5">b=125 のとき 1920 ms ／「set RTTTL tempo」が 0 以外ならそちらを優先</text>
+
+  <rect x="20" y="104" width="860" height="26" rx="6" fill="#1a1d23" stroke="#2d323d"/>
+  <rect x="20" y="104" width="430" height="26" rx="6" fill="#F0662B" opacity="0.75"/>
+  <text x="235" y="122" fill="#131519" font-size="12.5" font-weight="600" text-anchor="middle">4 分音符 = 1920 ÷ 4 = 480 ms</text>
+  <text x="470" y="122" fill="#98a2b3" font-size="12">8 分音符 = 240 ms</text>
+
+  <text x="20" y="176" fill="#e9ecf1" font-size="14" font-weight="600">1 つの音符の中身</text>
+  <rect x="20" y="192" width="640" height="30" rx="6" fill="#F0662B" opacity="0.85"/>
+  <rect x="660" y="192" width="60" height="30" rx="6" fill="#2d323d"/>
+  <text x="690" y="212" fill="#98a2b3" font-size="11.5" text-anchor="middle">15ms</text>
+  <text x="330" y="212" fill="#131519" font-size="12.5" font-weight="600" text-anchor="middle">鳴っている（長さ − 15 ms）</text>
+  <text x="740" y="212" fill="#98a2b3" font-size="11.5">← 無音。同じ音が続いても 2 つに聞こえる</text>
+  <text x="20" y="246" fill="#6f7a8a" font-size="12">15 ms より短い音符はすべて 15 ms に伸ばす（それより速いと Bluetooth が詰まるため）</text>
+</svg>
+<figcaption>
+  音符の間に必ず短い無音を入れます。これがないと、同じ高さの音が続いたときに
+  1 つの長い音に聞こえてしまいます。
+</figcaption>
+</figure>
+
+<h3>テンポの上書き</h3>
+<table>
+  <tr><th style="width:20%">設定</th><th>動き</th></tr>
+  <tr><td><code>120</code></td><td>どの曲も 120 BPM で鳴る</td></tr>
+  <tr><td><code>60</code></td><td>半分の速さ。教室で追いかけやすい</td></tr>
+  <tr><td><code>240</code></td><td>2 倍の速さ</td></tr>
+  <tr><td><code>0</code></td><td>上書きしない。曲に書かれたとおりに鳴る（既定）</td></tr>
+  <tr><td><code>400</code> 超 / 負の値</td><td>0〜400 に丸める</td></tr>
+  <tr><td>数値でない値</td><td>無視して、直前の設定のまま</td></tr>
+</table>
+<p class="muted small">
+  設定は変えるまで残るので、「はじめに」に 1 回置けばプログラム全体に効きます。
+  移調（キーの変更）は意図的に用意していません。曲の <code>o=</code> を書き換えてください。
+</p>
+
+<h2 id="s6"><span class="num">06</span>同時に鳴る曲は 1 つ</h2>
+
+<p>
+  曲が重なることはありません。新しい曲が始まると、鳴っていた曲はそこで<b>諦めます</b>。
+  仕組みは「チケット」で、<code>play RTTTL</code> のたびに番号が進み、自分の番号が
+  変わっていたら次の音符で降りる、というだけです。
+</p>
+
+<figure>
+<svg viewBox="0 0 900 220" role="img" aria-label="曲Aの再生中に新しい曲Bが始まると、曲Aは諦めて押さえていた音を離し、曲Bだけが鳴ることを示すタイムライン">
+  <text x="20" y="40" fill="#98a2b3" font-size="12.5">曲 A</text>
+  <rect x="90" y="26" width="52" height="20" rx="4" fill="#F0662B" opacity="0.85"/>
+  <rect x="150" y="26" width="52" height="20" rx="4" fill="#F0662B" opacity="0.85"/>
+  <rect x="210" y="26" width="52" height="20" rx="4" fill="#F0662B" opacity="0.85"/>
+  <rect x="270" y="26" width="52" height="20" rx="4" fill="#2d323d"/>
+  <line x1="322" y1="20" x2="322" y2="54" stroke="#ffd166" stroke-width="1.4" stroke-dasharray="3 3"/>
+  <text x="330" y="24" fill="#ffd166" font-size="11.5">もう一度押す / 別の曲を再生</text>
+
+  <text x="20" y="104" fill="#98a2b3" font-size="12.5">曲 A の音</text>
+  <rect x="90" y="88" width="232" height="18" rx="4" fill="#39d98a" opacity="0.8"/>
+  <line x1="322" y1="88" x2="322" y2="106" stroke="#ff7ab6" stroke-width="2"/>
+  <text x="330" y="102" fill="#ff7ab6" font-size="11.5">その場で note off（音が残らない）</text>
+
+  <text x="20" y="168" fill="#98a2b3" font-size="12.5">曲 B</text>
+  <rect x="320" y="154" width="52" height="20" rx="4" fill="#5aa9ff" opacity="0.85"/>
+  <rect x="380" y="154" width="52" height="20" rx="4" fill="#5aa9ff" opacity="0.85"/>
+  <rect x="440" y="154" width="52" height="20" rx="4" fill="#5aa9ff" opacity="0.85"/>
+  <rect x="500" y="154" width="52" height="20" rx="4" fill="#5aa9ff" opacity="0.85"/>
+
+  <line x1="90" y1="200" x2="860" y2="200" stroke="#2d323d"/>
+  <text x="90" y="216" fill="#6f7a8a" font-size="11.5">時間 →</text>
+</svg>
+<figcaption>
+  同じパッドを 2 回押すと、2 曲が重なるのではなく<b>曲が最初から鳴り直し</b>ます。
+  <code>stop RTTTL</code> と <code>all notes off</code> も同じ仕組みで、長い音符の途中でも即座に止まります。
+</figcaption>
+</figure>
+
+<div class="note ok">
+  <p>
+    実装上いちばん壊れやすいのがここです。<b>音を離す前に必ずチケットを照合</b>しています。
+    照合しないと、奪われた側が「新しい曲の音」を消してしまいます。
+  </p>
+</div>
+
+<h2 id="s7"><span class="num">07</span>接続と状態</h2>
+
+<figure>
+<svg viewBox="0 0 900 230" role="img" aria-label="Bluetooth が未接続・接続・切断の状態と、それぞれで LED と音符がどうなるかを示す状態図">
+  <defs>
+    <marker id="a7g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#39d98a"/>
+    </marker>
+    <marker id="a7p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ff7ab6"/>
+    </marker>
+    <marker id="a7b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5aa9ff"/>
+    </marker>
+  </defs>
+  <rect x="60" y="70" width="180" height="70" rx="12" fill="#22262f" stroke="#2d323d"/>
+  <text x="150" y="100" fill="#e9ecf1" font-size="14" text-anchor="middle">未接続</text>
+  <text x="150" y="122" fill="#98a2b3" font-size="11.5" text-anchor="middle">MIDI は送られない</text>
+
+  <rect x="360" y="70" width="180" height="70" rx="12" fill="#22262f" stroke="#39d98a" stroke-width="1.5"/>
+  <text x="450" y="100" fill="#39d98a" font-size="14" text-anchor="middle">接続中</text>
+  <text x="450" y="122" fill="#98a2b3" font-size="11.5" text-anchor="middle">パッドが鳴る</text>
+
+  <rect x="660" y="70" width="180" height="70" rx="12" fill="#22262f" stroke="#2d323d"/>
+  <text x="750" y="100" fill="#e9ecf1" font-size="14" text-anchor="middle">切断後</text>
+  <text x="750" y="122" fill="#98a2b3" font-size="11.5" text-anchor="middle">全音符を自動で止める</text>
+
+  <line x1="240" y1="105" x2="352" y2="105" stroke="#39d98a" stroke-width="2" marker-end="url(#a7g)"/>
+  <text x="296" y="94" fill="#39d98a" font-size="11.5" text-anchor="middle">接続</text>
+  <text x="296" y="126" fill="#98a2b3" font-size="11" text-anchor="middle">LED ✓ 400ms</text>
+
+  <line x1="540" y1="105" x2="652" y2="105" stroke="#ff7ab6" stroke-width="2" marker-end="url(#a7p)"/>
+  <text x="596" y="94" fill="#ff7ab6" font-size="11.5" text-anchor="middle">切断</text>
+  <text x="596" y="126" fill="#98a2b3" font-size="11" text-anchor="middle">LED ✕ 400ms</text>
+
+  <path d="M750,140 C750,190 450,190 450,140" fill="none" stroke="#5aa9ff" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#a7b)"/>
+  <text x="600" y="196" fill="#5aa9ff" font-size="11.5" text-anchor="middle">またつなげば戻る</text>
+
+  <text x="450" y="40" fill="#6f7a8a" font-size="12" text-anchor="middle">接続状態はブロックから読める（Bluetooth connected）</text>
+</svg>
+<figcaption>
+  切断時は <b>All Notes Off</b> を送り、<b>サステインも解除</b>し、鳴っている曲も止めます。
+  iPad 側に音が残らないようにするためです。
+</figcaption>
+</figure>
+
+<h2 id="s8"><span class="num">08</span>傾きの割り当て</h2>
+
+<figure>
+<svg viewBox="0 0 900 210" role="img" aria-label="本体の左右の傾きがピッチベンドに、手前奥の傾きがモジュレーションに対応することを示す図">
+  <text x="20" y="34" fill="#e9ecf1" font-size="14" font-weight="600">左右の傾き（Roll） → ピッチベンド</text>
+  <line x1="20" y1="76" x2="430" y2="76" stroke="#2d323d"/>
+  <line x1="20" y1="70" x2="20" y2="82" stroke="#2d323d"/><text x="20" y="100" fill="#98a2b3" font-size="11.5" text-anchor="middle">−90°</text>
+  <line x1="225" y1="66" x2="225" y2="86" stroke="#2d323d"/><text x="225" y="100" fill="#98a2b3" font-size="11.5" text-anchor="middle">0°</text>
+  <line x1="430" y1="70" x2="430" y2="82" stroke="#2d323d"/><text x="430" y="100" fill="#98a2b3" font-size="11.5" text-anchor="middle">+90°</text>
+  <text x="20" y="124" fill="#ff7ab6" font-size="11.5" text-anchor="middle">2 半音下げる</text>
+  <text x="225" y="124" fill="#6f7a8a" font-size="11.5" text-anchor="middle">変化なし</text>
+  <text x="430" y="124" fill="#39d98a" font-size="11.5" text-anchor="middle">2 半音上げる</text>
+
+  <text x="490" y="34" fill="#e9ecf1" font-size="14" font-weight="600">手前／奥の傾き（Pitch） → モジュレーション</text>
+  <line x1="490" y1="76" x2="860" y2="76" stroke="#2d323d"/>
+  <line x1="490" y1="70" x2="490" y2="82" stroke="#2d323d"/><text x="490" y="100" fill="#98a2b3" font-size="11.5" text-anchor="middle">−90°</text>
+  <line x1="675" y1="66" x2="675" y2="86" stroke="#2d323d"/><text x="675" y="100" fill="#98a2b3" font-size="11.5" text-anchor="middle">0°</text>
+  <line x1="860" y1="70" x2="860" y2="82" stroke="#2d323d"/><text x="860" y="100" fill="#98a2b3" font-size="11.5" text-anchor="middle">+90°</text>
+  <text x="490" y="124" fill="#6f7a8a" font-size="11.5" text-anchor="middle">CC1 = 0</text>
+  <text x="675" y="124" fill="#6f7a8a" font-size="11.5" text-anchor="middle">CC1 ≈ 64</text>
+  <text x="860" y="124" fill="#39d98a" font-size="11.5" text-anchor="middle">CC1 = 127</text>
+
+  <text x="20" y="170" fill="#6f7a8a" font-size="12">25 ms ごとに読みます。オフにすると、ベンドは中央・モジュレーションは 0 に戻します（ずれたままにならない）。</text>
+</svg>
+<figcaption>
+  傾きをオフにしたときに値を戻すのが要点です。戻さないと、最後の傾きがそのまま残って
+  「音がずっと半音高い」といった状態になります。
+</figcaption>
+</figure>
+
+<h2 id="s9"><span class="num">09</span>教室での運用</h2>
+
+<div class="grid">
+  <div class="card">
+    <h4>広告名</h4>
+    <p class="kpi">BBC micro:bit [zapuv]<small>プロジェクト設定が「ペアリング不要」のとき</small></p>
+  </div>
+  <div class="card">
+    <h4>設定が既定のままだと</h4>
+    <p class="kpi">BBC micro:bit<small>教室中のボタンが同じ名前になる</small></p>
+  </div>
+  <div class="card">
+    <h4>ID の総数</h4>
+    <p class="kpi">5⁵ = 3125 通り<small>30 台で衝突する確率は約 13%</small></p>
+  </div>
+</div>
+
+<div class="note warn">
+  <p>
+    <b>「ペアリング不要」は必須です。</b> 既定の JustWorks では MIDI のキャラクタリスティックに
+    「読み取りに認証が必要」が付き、iPad が接続直後に読もうとして <b>ATT Insufficient
+    Authentication</b> を受け、<b>iOS が即座に切断します</b>。設定は .hex に焼き込まれるので、
+    変更後は<b>必ず焼き直し</b>てください。焼き直さないと ID の <code>[ ]</code> も戻りません。
+  </p>
+</div>
+
+<p>
+  ID はチップのシリアル番号から作られるため<b>変更できません</b>。書き込み直しても残ります。
+  同じ ID が 2 つ見えたときは、片方につないで本体を見てください。接続時に ✓ が出るのは
+  自分の本体なので、違えば切断してもう片方につなぎます。
+</p>
+
+<h2 id="s10"><span class="num">10</span>既知の制限・検証状況</h2>
+
+<h3>動作環境</h3>
+<table>
+  <tr><th style="width:34%">項目</th><th>内容</th></tr>
+  <tr><td>必要なボード</td><td><b>micro:bit V2</b>（ロゴタッチと V2 の BLE スタックを使うため）。V1 では拡張機能を追加できません（error 929）</td></tr>
+  <tr><td>書き込み時の警告</td><td>「V2 オンリーでダウンロード」と聞かれます。<b>正常です。</b> BLE スタックは V1 の 242,688 バイトに収まりません</td></tr>
+  <tr><td>BLE の実装</td><td><code>github:RBilsland/pxt-bluetooth-midi</code>（CODAL 版）。公式の <code>microsoft/pxt-bluetooth-midi</code> は V1 用の mBed API 依存で V2 ではビルドできません</td></tr>
+  <tr><td>MIDI メッセージ生成</td><td><code>github:microsoft/pxt-midi#v2.1.11</code></td></tr>
+  <tr><td>シミュレータ</td><td>ブロックは動きますが BLE MIDI は実機のみ。<code>device ID</code> は仮の値 <code>simul</code> を返します</td></tr>
+</table>
+
+<h3>検証済み / 未検証</h3>
+<div class="note ok">
+  <p><b>自動検証で確認済み</b>（このリポジトリの検証手順で毎回実行）</p>
+  <ul>
+    <li>型検査（<code>tsc --noEmit</code>）— パッケージ本体・<code>test.ts</code>・ヘルプページの全コード例</li>
+    <li>スタブ実行 <b>104 項目</b>（RTTTL 51 / パッド 53）すべて成功</li>
+    <li>パッケージ整合（blockId の一意性・export 対応・日本語 <code>%param</code> の一致）</li>
+    <li>ヘルプページ 12 ページ（英 6 / 日 6）の構造とコード例のコンパイル</li>
+  </ul>
+</div>
+
+<div class="note warn">
+  <p><b>実機で未確認のこと</b></p>
+  <ul>
+    <li><code>set RTTTL tempo</code> の両端 — <code>60</code> で間延びしないか、<code>400</code> 付近で BLE が詰まらないか</li>
+    <li>パッドの連打で曲が重ならないこと（仕組み上は保証していますが、実機での耳確認は未実施）</li>
+    <li>エディタの右クリック → ヘルプからのページ表示（<code>help=</code> を入れた直後のため、コミット SHA を固定したテストが必要）</li>
+  </ul>
+</div>
+
+<h3>意図的にそうしていること</h3>
+<table>
+  <tr><th style="width:36%">こと</th><th>理由</th></tr>
+  <tr><td>A+B の打ち消しがない</td><td>micro:bit のボタンは 2 つだけ。同時押しを「3 つ目のパッド」として使えるようにしている</td></tr>
+  <tr><td><code>play RTTTL</code> が待つ</td><td>内部で勝手に「背景で実行」を呼ばない。必要なら利用者が包む（そうしないと意図せず曲が重なる）</td></tr>
+  <tr><td>移調がない</td><td>テンポと同じ軸に機能を増やさない。キーは曲の <code>o=</code> で変える</td></tr>
+  <tr><td>RTTTL は 1 文字ずつ解析</td><td>部分文字列を作らない。micro:bit はメモリがすぐ足りなくなる</td></tr>
+  <tr><td>音符の間の 15 ms の無音</td><td>同じ高さの音が続いたときに 2 つの音に聞こえるようにするため</td></tr>
+</table>
+
+<footer>
+  <p>
+    GarageBand Pad / <code>github:hinyhiny/pxt-microbit-garageband-pad</code> — MIT<br>
+    "GarageBand" は Apple Inc. の商標です。本パッケージは Apple とは無関係の非公式なものです。
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -101,6 +101,11 @@ if (enableBonding || !CONFIG_ENABLED(MICROBIT_BLE_WHITELIST)) {
 
 ## ブロック
 
+どのブロックにも専用のヘルプページがあります。エディタでブロックを右クリックして
+**ヘルプ**を選ぶと開けます（JavaScript 表示なら呼び出しの上にカーソルを置いて同じメニュー）。
+ページは [`docs/`](docs/) にあり、それぞれの日本語版も `docs/_locales/ja/` に入れています。
+エディタの言語が日本語なら、日本語版のほうが自動で開きます。
+
 ### Setup（準備）
 
 | ブロック | 説明 |
@@ -410,6 +415,14 @@ micro:bit アプリで間違えやすい点が 2 つあります。
 ├── LICENSE.txt                  # MIT
 ├── .github/
 │   └── social-preview.png       # このページ先頭のバナー兼リンクプレビュー用（1280×640）
+├── docs/                        # オンラインヘルプ（エディタでブロックを右クリック → ヘルプ）
+│   ├── setup.md                 #   準備のブロック
+│   ├── pads.md                  #   パッドのブロック
+│   ├── notes.md                 #   音符のブロック
+│   ├── rtttl.md                 #   RTTTL のブロック
+│   ├── expression.md            #   表現とその他のブロック
+│   ├── classroom.md             #   教室のブロック
+│   └── _locales/ja/             #   上のページの日本語版
 ├── _locales/ja/
 │   ├── garageband-pad-strings.json       # ブロック表示の日本語
 │   └── garageband-pad-jsdoc-strings.json # ツールチップの日本語

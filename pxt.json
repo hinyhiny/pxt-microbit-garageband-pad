@@ -14,7 +14,19 @@
         "README.ja.md",
         "garageband-pad.ts",
         "_locales/ja/garageband-pad-strings.json",
-        "_locales/ja/garageband-pad-jsdoc-strings.json"
+        "_locales/ja/garageband-pad-jsdoc-strings.json",
+        "docs/setup.md",
+        "docs/pads.md",
+        "docs/notes.md",
+        "docs/rtttl.md",
+        "docs/expression.md",
+        "docs/classroom.md",
+        "docs/_locales/ja/setup.md",
+        "docs/_locales/ja/pads.md",
+        "docs/_locales/ja/notes.md",
+        "docs/_locales/ja/rtttl.md",
+        "docs/_locales/ja/expression.md",
+        "docs/_locales/ja/classroom.md"
     ],
     "testFiles": [
         "test.ts"

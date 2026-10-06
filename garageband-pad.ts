@@ -307,6 +307,7 @@ namespace gbpad {
      * @param instrument the instrument number, 1 to 128
      */
     //% blockId=gbpad_start block="start GarageBand Pad|channel %channel|instrument %instrument"
+    //% help=github:garageband-pad/docs/setup
     //% channel.min=1 channel.max=16 channel.defl=1
     //% instrument.min=1 instrument.max=128 instrument.defl=1
     //% group="Setup" weight=100
@@ -321,6 +322,7 @@ namespace gbpad {
      * @param channel the MIDI channel, 1 to 16
      */
     //% blockId=gbpad_set_channel block="set MIDI channel %channel"
+    //% help=github:garageband-pad/docs/setup
     //% channel.min=1 channel.max=16 channel.defl=1
     //% group="Setup" weight=92
     export function setChannel(channel: number): void {
@@ -332,6 +334,7 @@ namespace gbpad {
      * @param instrument the instrument number, 1 to 128
      */
     //% blockId=gbpad_set_instrument block="set instrument %instrument"
+    //% help=github:garageband-pad/docs/setup
     //% instrument.min=1 instrument.max=128 instrument.defl=1
     //% group="Setup" weight=90
     export function setInstrument(instrument: number): void {
@@ -343,6 +346,7 @@ namespace gbpad {
      * @param velocity the note velocity, 1 to 127
      */
     //% blockId=gbpad_set_velocity block="set pad velocity %velocity"
+    //% help=github:garageband-pad/docs/setup
     //% velocity.min=1 velocity.max=127 velocity.defl=100
     //% group="Setup" weight=88
     export function setVelocity(velocity: number): void {
@@ -355,6 +359,7 @@ namespace gbpad {
      * @param volume the volume, 0 to 127
      */
     //% blockId=gbpad_set_volume block="set channel volume %volume"
+    //% help=github:garageband-pad/docs/setup
     //% volume.min=0 volume.max=127 volume.defl=100
     //% group="Setup" weight=86
     export function setVolume(volume: number): void {
@@ -366,6 +371,7 @@ namespace gbpad {
      * @param handler code to run when a device connects
      */
     //% blockId=gbpad_on_connected block="on Bluetooth connected"
+    //% help=github:garageband-pad/docs/setup
     //% group="Setup" weight=84
     export function onConnected(handler: () => void): void {
         startEngine();
@@ -377,6 +383,7 @@ namespace gbpad {
      * @param handler code to run when the device goes away
      */
     //% blockId=gbpad_on_disconnected block="on Bluetooth disconnected"
+    //% help=github:garageband-pad/docs/setup
     //% group="Setup" weight=82
     export function onDisconnected(handler: () => void): void {
         startEngine();
@@ -387,6 +394,7 @@ namespace gbpad {
      * Tells whether an iPad is connected over Bluetooth.
      */
     //% blockId=gbpad_is_connected block="Bluetooth connected"
+    //% help=github:garageband-pad/docs/setup
     //% group="Setup" weight=80
     export function isConnected(): boolean {
         startEngine();
@@ -401,6 +409,7 @@ namespace gbpad {
      * @param note the MIDI note number, eg: 60
      */
     //% blockId=gbpad_bind_pad block="bind pad %pad|to note %note"
+    //% help=github:garageband-pad/docs/pads
     //% note.min=0 note.max=127 note.defl=60
     //% group="Pads" weight=100
     export function bindPad(pad: MidiPad, note: number): void {
@@ -416,6 +425,7 @@ namespace gbpad {
      * @param chord the chord shape
      */
     //% blockId=gbpad_bind_pad_chord block="bind pad %pad|to chord %root|%chord"
+    //% help=github:garageband-pad/docs/pads
     //% root.min=0 root.max=127 root.defl=60
     //% group="Pads" weight=98
     export function bindPadChord(pad: MidiPad, root: number, chord: Chord): void {
@@ -434,6 +444,7 @@ namespace gbpad {
      * Removes every note and chord from the pads.
      */
     //% blockId=gbpad_clear_pads block="unbind all pads"
+    //% help=github:garageband-pad/docs/pads
     //% group="Pads" weight=88
     export function clearPads(): void {
         allNotesOff();
@@ -446,6 +457,7 @@ namespace gbpad {
      * @param handler code to run when the pad is pressed
      */
     //% blockId=gbpad_on_pad_pressed block="on pad %pad|pressed"
+    //% help=github:garageband-pad/docs/pads
     //% group="Pads" weight=96
     export function onPadPressed(pad: MidiPad, handler: () => void): void {
         startEngine();
@@ -458,6 +470,7 @@ namespace gbpad {
      * @param handler code to run when the pad is released
      */
     //% blockId=gbpad_on_pad_released block="on pad %pad|released"
+    //% help=github:garageband-pad/docs/pads
     //% group="Pads" weight=94
     export function onPadReleased(pad: MidiPad, handler: () => void): void {
         startEngine();
@@ -469,6 +482,7 @@ namespace gbpad {
      * @param pad the pad to check
      */
     //% blockId=gbpad_pad_is_pressed block="pad %pad|is pressed"
+    //% help=github:garageband-pad/docs/pads
     //% group="Pads" weight=86
     export function padIsPressed(pad: MidiPad): boolean {
         return readPad(limit(pad, 0, PAD_COUNT - 1));
@@ -479,6 +493,7 @@ namespace gbpad {
      * @param octaves how many octaves to shift, eg: 1
      */
     //% blockId=gbpad_shift_octave block="shift pad octave by %octaves"
+    //% help=github:garageband-pad/docs/pads
     //% octaves.min=-4 octaves.max=4 octaves.defl=1
     //% group="Pads" weight=84
     export function shiftOctave(octaves: number): void {
@@ -489,6 +504,7 @@ namespace gbpad {
      * Puts the pad octave back to its original position.
      */
     //% blockId=gbpad_reset_octave block="reset pad octave"
+    //% help=github:garageband-pad/docs/pads
     //% group="Pads" weight=82
     export function resetOctave(): void {
         octaveShift = 0;
@@ -502,6 +518,7 @@ namespace gbpad {
      * @param octave the octave, 0 to 8, eg: 4
      */
     //% blockId=gbpad_note block="note %name|octave %octave"
+    //% help=github:garageband-pad/docs/notes
     //% octave.min=0 octave.max=8 octave.defl=4
     //% group="Notes" weight=90
     export function note(name: NoteName, octave: number): number {
@@ -514,6 +531,7 @@ namespace gbpad {
      * @param velocity the note velocity, 1 to 127
      */
     //% blockId=gbpad_note_on block="note on %note|velocity %velocity"
+    //% help=github:garageband-pad/docs/notes
     //% note.min=0 note.max=127 note.defl=60
     //% velocity.min=1 velocity.max=127 velocity.defl=100
     //% group="Notes" weight=88
@@ -526,6 +544,7 @@ namespace gbpad {
      * @param note the MIDI note number, eg: 60
      */
     //% blockId=gbpad_note_off block="note off %note"
+    //% help=github:garageband-pad/docs/notes
     //% note.min=0 note.max=127 note.defl=60
     //% group="Notes" weight=86
     export function noteOff(note: number): void {
@@ -538,6 +557,7 @@ namespace gbpad {
      * @param duration how long to hold the note, in milliseconds
      */
     //% blockId=gbpad_play_note block="play note %note|for %duration ms"
+    //% help=github:garageband-pad/docs/notes
     //% note.min=0 note.max=127 note.defl=60
     //% duration.min=1 duration.max=10000 duration.defl=500
     //% group="Notes" weight=84
@@ -554,6 +574,7 @@ namespace gbpad {
      * @param duration how long to hold the chord, in milliseconds
      */
     //% blockId=gbpad_play_chord block="play chord %root|%chord|for %duration ms"
+    //% help=github:garageband-pad/docs/notes
     //% root.min=0 root.max=127 root.defl=60
     //% duration.min=1 duration.max=10000 duration.defl=500
     //% group="Notes" weight=82
@@ -673,6 +694,7 @@ namespace gbpad {
      * @param bpm the tempo in beats per minute, or 0 to use the tempo in the tune
      */
     //% blockId=gbpad_rtttl_tempo block="set RTTTL tempo to %bpm (bpm)"
+    //% help=github:garageband-pad/docs/rtttl
     //% bpm.min=0 bpm.max=400 bpm.defl=120
     //% group="RTTTL" weight=95
     export function setRtttlTempo(bpm: number): void {
@@ -709,6 +731,7 @@ namespace gbpad {
      * @param tune an RTTTL string, eg: "Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f"
      */
     //% blockId=gbpad_rtttl_play block="play RTTTL %tune"
+    //% help=github:garageband-pad/docs/rtttl
     //% tune.defl="Ode:d=4,o=5,b=125:8e,8e,8f,8g,8g,8f,8e,8d,8c,8c,8d,8e,8e.,8d,4d"
     //% group="RTTTL" weight=100
     export function playRtttl(tune: string): void {
@@ -838,6 +861,7 @@ namespace gbpad {
      * until the end of its length.
      */
     //% blockId=gbpad_rtttl_stop block="stop RTTTL"
+    //% help=github:garageband-pad/docs/rtttl
     //% group="RTTTL" weight=90
     export function stopRtttl(): void {
         rtttlTicket++;
@@ -851,6 +875,7 @@ namespace gbpad {
      * @param mode turn tilt pitch bend on or off
      */
     //% blockId=gbpad_tilt_bend block="tilt pitch bend %mode"
+    //% help=github:garageband-pad/docs/expression
     //% group="Expression" weight=80
     export function tiltPitchBend(mode: OnOff): void {
         startEngine();
@@ -863,6 +888,7 @@ namespace gbpad {
      * @param mode turn tilt modulation on or off
      */
     //% blockId=gbpad_tilt_modulation block="tilt modulation %mode"
+    //% help=github:garageband-pad/docs/expression
     //% group="Expression" weight=78
     export function tiltModulation(mode: OnOff): void {
         startEngine();
@@ -877,6 +903,7 @@ namespace gbpad {
      * @param mode sustain on or off
      */
     //% blockId=gbpad_sustain block="sustain %mode"
+    //% help=github:garageband-pad/docs/expression
     //% group="Utility" weight=80
     export function sustain(mode: OnOff): void {
         ctrl().controlChange(64, mode == OnOff.On ? 127 : 0);
@@ -887,6 +914,7 @@ namespace gbpad {
      * A tune started with "play RTTTL" is stopped too.
      */
     //% blockId=gbpad_all_notes_off block="all notes off"
+    //% help=github:garageband-pad/docs/expression
     //% group="Utility" weight=78
     export function allNotesOff(): void {
         ensureState();
@@ -912,6 +940,7 @@ namespace gbpad {
      * The ID cannot be changed: it is derived from the chip's serial number.
      */
     //% blockId=gbpad_device_id block="device ID"
+    //% help=github:garageband-pad/docs/classroom
     //% shim=control::deviceName
     //% group="Classroom" weight=90
     export function deviceId(): string {
@@ -929,6 +958,7 @@ namespace gbpad {
      * entry in the GarageBand device list.
      */
     //% blockId=gbpad_show_device_id block="show device ID"
+    //% help=github:garageband-pad/docs/classroom
     //% group="Classroom" weight=88
     export function showDeviceId(): void {
         basic.showString(deviceId());

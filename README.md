@@ -102,6 +102,12 @@ If it will not connect, tap Edit → Forget on the iPad, reset the micro:bit, an
 
 ## Blocks
 
+Every block has a help page of its own. Right-click the block in the editor and
+pick **Help** (in the JavaScript view, put the cursor on the call and use the same
+menu). The pages live in [`docs/`](docs/), with a Japanese version of each one in
+`docs/_locales/ja/` — the editor opens those automatically when the editor
+language is Japanese.
+
 ### Setup
 
 | Block | Description |
@@ -412,6 +418,14 @@ One more thing worth knowing: a V2 powers **off** when you hold reset until the 
 ├── LICENSE.txt                  # MIT
 ├── .github/
 │   └── social-preview.png       # Banner at the top of this page, and the link preview (1280x640)
+├── docs/                        # Online help: right-click a block in the editor → Help
+│   ├── setup.md                 #   Setup blocks
+│   ├── pads.md                  #   Pad blocks
+│   ├── notes.md                 #   Note blocks
+│   ├── rtttl.md                 #   RTTTL blocks
+│   ├── expression.md            #   Expression and utility blocks
+│   ├── classroom.md             #   Classroom blocks
+│   └── _locales/ja/             #   Japanese versions of the pages above
 ├── _locales/ja/
 │   ├── garageband-pad-strings.json       # Japanese block labels
 │   └── garageband-pad-jsdoc-strings.json # Japanese tooltips
